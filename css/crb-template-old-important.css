@@ -1,0 +1,61 @@
+/* Оформление блока ссылок
+    Важно! Не изменяйте этот файл - при обновлении плагина все изменения пропадут.
+    Добавляйте свои стили в файлы дочерней темы.
+ */
+
+.crb-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    grid-auto-flow: row !important;
+    grid-auto-rows: auto !important;
+    grid-column-gap: 10px !important;
+    grid-row-gap: 15px !important;
+}
+
+.crb-item-container {
+    height: 240px !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.crb-item-container > a {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    color: #2b68a8 !important;
+}
+
+.crb-item-container img {
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+.crb-item-container p {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 5px 10px !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    font-size: 16px !important;
+}
+.crb-item-container:hover p {
+    background: rgba(255, 255, 255, 1) !important;
+}
+
+.crb-header {
+    text-transform: uppercase !important;
+    font-weight: bold !important;
+}
+
+@media screen and (max-width: 40em) {
+    .crb-container {
+        grid-template-columns: 1fr !important;
+        grid-auto-flow: row !important;
+        grid-auto-rows: auto !important;
+        grid-column-gap: 0 !important;
+        grid-row-gap: 15px !important;
+    }
+}
+

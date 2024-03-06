@@ -1,0 +1,6 @@
+.idea
+.git
+.vscode
+*.csv
+stats
+export_options.txt
