@@ -80,7 +80,6 @@ function linkate_add_stopwords() {
 
 	$is_white = isset($_POST['is_white']) ? intval($_POST['is_white']) : 0;
 
-	require_once (WP_PLUGIN_DIR . "/cherrylink/cherrylink_stemmer_ru.php");
 	$stemmer = new Stem\LinguaStemRu();
 
 	$query = "INSERT INTO $table_name (stemm, word, is_white, is_custom) VALUES ";

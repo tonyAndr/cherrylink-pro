@@ -117,7 +117,7 @@ function link_cf_set_options($option_key, $arg) {
 	// the last options cannot be set via arguments
 	$arg['stripcodes'] = @$options['stripcodes'];
 	$arg['utf8'] = @$options['utf8'];
-	$arg['use_stemmer'] = @$options['use_stemmer'];
+	$arg['use_stemming'] = @$options['use_stemming'];
 	$arg['batch'] = @$options['batch'];
 
 	// for related block
@@ -553,7 +553,54 @@ function link_cf_get_suggestions_for_ids($results) {
     return $results;
 }
 
+function linkate_decode_yoast_variables($post_id, $is_term = false)
+{
+    $string =  WPSEO_Meta::get_value('title', $post_id);
+    if ($string !== '') {
+        $replacer = new WPSEO_Replace_Vars();
 
+        return $replacer->replace($string, get_post($post_id));
+    } else {
+        return '';
+    }
+}
+
+function linkate_get_post_seo_title ($post, $seo_meta_source = 'none') {
+    if (!$seo_meta_source || $seo_meta_source === 'none') {
+        return '';
+    }
+    $seotitle = '';
+    switch($seo_meta_source) {
+        case 'yoast':
+            if (function_exists('wpseo_init')){
+                $seotitle = linkate_decode_yoast_variables($post->ID);
+                // TODO: YoastSEO()->meta->for_current_page()->title;
+            }
+            break;
+        case 'aioseo':
+            //All in One SEO Pack 4.0 Before
+            if (!empty(get_post_meta($post->ID, '_aioseop_title', true))) {
+                $seotitle = get_post_meta($post->ID, '_aioseop_title', true);
+            }
+            //All in One SEO 4.0 After
+            if (function_exists( 'aioseo' )){
+                    $seotitle = aioseo()->meta->metaData->getMetaData($post)->title;
+                    if(!empty($seotitle)) {
+                        $seotitle = aioseo()->meta->title->getPostTitle($post->ID);
+                    }
+            }  
+            break;
+        case 'rankmath': 
+            if ( class_exists( 'RankMath' ) ) {
+                $seotitle = RankMath\Post::get_meta( 'title', $post->ID, RankMath\Paper\Paper::get_from_options( "pt_{$post->post_type}_title", $post, '%title% %sep% %sitename%' ) );
+            }
+            break;
+        default:
+            $seotitle = '';
+            break;
+    }
+    return is_string($seotitle) ? $seotitle : '';
+}
 
 /*
 

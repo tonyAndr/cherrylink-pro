@@ -2,59 +2,54 @@
  * Linkate Posts
  */
 
+input.reset {
+    all: unset;
+}
+
 .linkateposts-admin-flex {
     display: flex;
-    margin-right:21px;
+    margin-right: 21px;
     flex-wrap: nowrap;
     align-content: stretch;
 }
+
 /*.linkateposts-admin-flex .wrap {
     margin-right:0;
 }*/
- 
-.linkateposts-tab-content{
-    background: #FFFFFF;
-    padding: 20px;
-    border: 1px solid #dcdcdc;
+
+.linkateposts-tab-content {
     margin-top: 0px;
-	border-top: none;
-    flex-grow: 3;
+    border-top: none;
     min-width: 500px;
+
+
 }
 
-.linkateposts-tabs-menu{
-	background: #FFFFFF;
-    padding: 10px;
-    border: 1px solid #dcdcdc;
-    margin: 10px 20px 0 2px;
-    border-bottom: 2px solid #e43839;
-}
-
-.linkateposts-tabs-menu li a{
-	font-size: 14px;
+.linkateposts-tabs-menu li a {
+    font-size: 14px;
     text-decoration: none;
     padding: 8px 12px;
     font-weight: 500;
     color: #999;
-	box-sizing:content-box;
+    box-sizing: content-box;
     text-transform: uppercase;
 }
 
-.linkateposts-tabs-menu li a:hover{
-	border:none;
-	border-bottom: 4px solid #e43839;
-	color:#23282d;
+.linkateposts-tabs-menu li a:hover {
+    border: none;
+    border-top: 4px solid #FFC618;
+    color: #23282d;
 }
 
-.linkateposts-tabs-menu li a:focus{
-	outline: none;
-    outline-style:none;
-    box-shadow:none;
+.linkateposts-tabs-menu li a:focus {
+    outline: none;
+    outline-style: none;
+    box-shadow: none;
 }
 
-.linkateposts-tabs-menu li a.current{
-	color:#23282d;
-	border-bottom: 4px solid #e43839;
+.linkateposts-tabs-menu li a.current {
+    color: #23282d;
+    border-top: 4px solid #FFC618;
 }
 
 /* .linkateposts-tabs-menu li a[href*="output_block"]:after {
@@ -64,18 +59,18 @@
 } */
 
 
-.linkateposts-inner-table{ 
+.linkateposts-inner-table {
     border-spacing: 0;
     border-collapse: collapse;
 }
 
 
-.linkateposts-inner-table tr td{
-	border:1px solid #CCC;
+.linkateposts-inner-table tr td {
+    border: 1px solid #CCC;
     padding: 5px;
 }
 
-.linkateposts-tab-content .form-table tr td:nth-child(3){
+.linkateposts-tab-content .form-table tr td:nth-child(3) {
     text-align: right;
 }
 
@@ -87,17 +82,20 @@
     text-decoration: none;
     text-shadow: 0 -1px 1px #b42122, 1px 0 1px #b42122, 0 1px 1px #b42122, -1px 0 1px #b42122;
 }
+
 .linkateposts-tab-content .button-cherry:hover {
     background: #ff3e42;
     border-color: #b42122;
-    color:white;
+    color: white;
 }
+
 .linkateposts-tab-content .button-cherry:focus {
     border-color: #c42e2f #b42122 #b42122;
     box-shadow: 0 1px 0 #b42122;
     background: white;
     color: #c42e2f;
 }
+
 .linkate-cover-tab {
     position: absolute;
     width: 100%;
@@ -107,16 +105,17 @@
 }
 
 #cherry {
-  position: absolute;
-  right: 100px;
-  top: 67px;
+    position: absolute;
+    right: 100px;
+    top: 67px;
 }
 
 .linkateposts-column-left textarea {
-    width:100%;
+    width: 100%;
 }
+
 .column-left-export textarea {
-    width:100%;
+    width: 100%;
 
 }
 
@@ -132,18 +131,19 @@
 }
 
 .linkateposts-admin-sidebar {
-    flex-grow:1;
+    flex-grow: 1;
     max-width: 300px;
     min-width: 250px;
 }
 
-.linkateposts-admin-sidebar > div.sb-info {
+.linkateposts-admin-sidebar>div.sb-info {
     padding: 1em;
     background: lavender;
     border: 1px solid #dcdcdc;
     margin-top: 1em;
 }
-.linkateposts-admin-sidebar > div.sb-news {
+
+.linkateposts-admin-sidebar>div.sb-news {
     padding: 1em;
     background: white;
     border: 1px solid #dcdcdc;
@@ -151,31 +151,36 @@
     margin-top: 1em;
 }
 
-.linkateposts-admin-sidebar img{
-    width:100%;
+.linkateposts-admin-sidebar img {
+    width: 100%;
 }
 
 
 .linkateposts-admin-sidebar iframe {
-    width:100%;
+    width: 100%;
 }
+
 .linkateposts-accessibility-good,
 .linkateposts-accessibility-warning {
     padding: 1em;
     color: white;
 }
+
 .linkateposts-accessibility-good h2,
 .linkateposts-accessibility-warning h2 {
     color: white;
     margin-top: 0;
 }
+
 .linkateposts-accessibility-good a,
 .linkateposts-accessibility-warning a {
     color: #66bce4;
 }
+
 .linkateposts-accessibility-good {
     background: green;
 }
+
 .linkateposts-accessibility-warning {
     background: tomato;
 }
@@ -188,23 +193,26 @@
 #reindex_progress {
     display: none;
 }
+
 #csv_progress {
     display: none;
 }
+
 #reindex_progress_text {
     font-weight: bold;
 }
 
 progress {
-    width:100%; 
-    height:30px;
-    margin:10px 0;
+    width: 100%;
+    height: 30px;
+    margin: 10px 0;
 }
 
 .linkate-available-tags {
     list-style-type: none;
 }
-.linkate-available-tags li{
+
+.linkate-available-tags li {
     display: inline-block;
 }
 
@@ -224,7 +232,7 @@ progress {
     display: inline-block;
 }
 
-.cherry-adm-tooltip > img {
+.cherry-adm-tooltip>img {
     border: 1px solid #dcdcdc;
     border-radius: 50%;
     padding: 1px;
@@ -245,7 +253,7 @@ progress {
     position: absolute;
     z-index: 1;
 
-    bottom:0;
+    bottom: 0;
     left: 155%;
 
     opacity: 0;
@@ -260,28 +268,32 @@ progress {
 
 
 /* Spoiler */
-input[id^="spoiler"]{
+input[id^="spoiler"] {
     display: none;
 }
-input[id^="spoiler"] + label {
-    display: block;
+
+input[id^="spoiler"]+label {
+    display: inline-block;
     padding: 5px 20px;
     margin: 0 auto;
-    background: #00b75f;
-    color: #fff;
+    background: white;
+    color: black;
     text-align: center;
-    font-size: 18px;
+    font-size: 14px;
     border-radius: 8px;
+    border: 1px solid lightgray;
     cursor: pointer;
     transition: all .6s;
-    height: 30px;
-    line-height: 30px;
+    /* height: 30px; */
+    /* line-height: 30px; */
 }
-input[id^="spoiler"]:checked + label {
+
+input[id^="spoiler"]:checked+label {
     color: #333;
     background: #ccc;
 }
-input[id^="spoiler"] ~ [class^="spoiler"] {
+
+input[id^="spoiler"]~[class^="spoiler"] {
     height: 0;
     overflow: hidden;
     opacity: 0;
@@ -289,7 +301,8 @@ input[id^="spoiler"] ~ [class^="spoiler"] {
     padding: 0;
     transition: all .6s;
 }
-input[id^="spoiler"]:checked + label + [class^="spoiler"]{
+
+input[id^="spoiler"]:checked+label+[class^="spoiler"] {
     height: auto;
     overflow: visible;
     opacity: 1;
@@ -301,10 +314,11 @@ input[id^="spoiler"]:checked + label + [class^="spoiler"]{
     cursor: pointer;
     background: rgba(255, 57, 57, 0.44);
 }
+
 #index_stopwords_suggestions {
     padding: 10px;
-    margin-top:20px;
-    max-width:500px;
+    margin-top: 20px;
+    max-width: 500px;
     background: lavender;
     display: none;
 }
@@ -313,26 +327,30 @@ input[id^="spoiler"]:checked + label + [class^="spoiler"]{
     margin-top: 10px;
     text-align: center;
 }
-.linkate-get-addon > a {
+
+.linkate-get-addon>a {
     padding: 10px;
     background: #e43839;
     font-size: 20px;
     font-weight: bolder;
     color: white;
-    display:inline-block;
+    display: inline-block;
     border-radius: 3px;
 }
-.linkate-get-addon > a:hover {
+
+.linkate-get-addon>a:hover {
     padding: 10px;
     background: rgba(228, 56, 57, 0.69);
     font-size: 20px;
     /*font-weight: bolder;*/
     color: #e0e0e0;
-    display:inline-block;
+    display: inline-block;
 }
+
 .crb-addon-info {
     list-style: disc;
 }
+
 .crb-addon-info li {
     margin-left: 10px;
 }
@@ -345,9 +363,9 @@ input[id^="spoiler"]:checked + label + [class^="spoiler"]{
 
 .cherry-db-status .cherry-adm-tooltip {
     position: absolute;
-    right:0;
-    top:0;
-    margin:10px;
+    right: 0;
+    top: 0;
+    margin: 10px;
 }
 
 .cherry-db-status .cherry-adm-tooltip .tooltiptext {
@@ -355,26 +373,27 @@ input[id^="spoiler"]:checked + label + [class^="spoiler"]{
 }
 
 .cherry_db_status_good {
-    color:green;
+    color: green;
     font-weight: bold;
 }
 
 .cherry_db_status_bad {
-    color:tomato;
+    color: tomato;
     font-weight: bold;
 }
 
 code.bad-index {
-    background: #ffb630;
-    color: #4a4a4a;
+    background: white;
+    color: #eda318;
 }
+
 code.good-index {
-    background: rgb(157, 230, 98);
-    color: #4a4a4a;
+    background: white;
+    color: rgb(98, 198, 17);
 }
 
 .cherry-stats-preview-table {
-    width:100%;
+    width: 100%;
 }
 
 .cherry-stats-preview-table td {
@@ -386,24 +405,8 @@ code.good-index {
 
 .cherry-stats-preview-table td:first-child,
 .cherry-stats-preview-table td:last-child {
-    width:80px;
+    width: 80px;
     text-align: center;
-}
-
-.cherry-settings-export-container {
-    display:flex;
-    flex-flow: row;
-    width: 100%;
-    flex-wrap:wrap;
-    justify-content: flex-start;
-}
-.cherry-settings-export-container > div {
-    max-width: 600px;
-    flex-grow: 1;
-    margin-bottom: 10px;
-    background: gainsboro;
-    padding:10px;
-    margin-right: 10px;
 }
 
 /* plugin update warning */

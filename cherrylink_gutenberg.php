@@ -52,7 +52,7 @@ function register_cherrylink_gutenberg_scripts() {
     $js_path = '';
     if (($_SERVER['HTTP_HOST']) === 'seoplugs') {
         //DEBUG ONLY 
-        $js_path = plugins_url( '../cherrylink-gutenberg/build/index.js', __FILE__ );
+        $js_path = plugins_url( './gutenberg-src/build/cherry-gutenberg.js', __FILE__ );
     } else {
         //RELEASE
         $js_path = plugins_url( 'js/cherry-gutenberg.js', __FILE__ );
@@ -61,7 +61,7 @@ function register_cherrylink_gutenberg_scripts() {
 		'cherrylink-gutenberg',
 		$js_path,
 		array('react', 'wp-blocks', 'wp-edit-post', 'wp-element', 'wp-i18n', 'wp-plugins', 'wp-polyfill'),
-		'111'
+		LinkatePosts::get_linkate_version()
     );
 
 	wp_localize_script( 'cherrylink-gutenberg', 'ajax_var', array(

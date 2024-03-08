@@ -1,6 +1,6 @@
 === CherryLink ===
 Tags: seo, links
-Requires at least: 4.7
+Requires at least: 5.6
 Tested up to: 6.4.3
 Stable tag: 2.4.1
 Requires PHP: 5.6.38

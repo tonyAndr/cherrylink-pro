@@ -74,12 +74,12 @@ jQuery(document).ready(function ($) {
 
                 $('.crb-meta-visual').html(visual_content);
             } else {
-                let host = window.location.href.replace(window.location.href.slice(window.location.href.indexOf('/wp-admin/') + 10), 'options-general.php?page=linkate-posts&subpage=output_block');
+                let host = window.location.href.replace(window.location.href.slice(window.location.href.indexOf('/wp-admin/') + 10), 'options-general.php?page=cherrylink-pro&subpage=output_block');
                 let visual_content = '<p>Ссылки не выбраны - будут показаны похожие статьи в соответствии с <a href="' + host + '">настройками плагина</a>.</p>';
                 $('.crb-meta-visual').html(visual_content);
             }
         }
-        $('.crb-remove-item').unbind().on('click', function (e) {
+        $('.crb-remove-item').off().on('click', function (e) {
             crb_remove_from_block($(this).parent().attr('data-postid'));
         })
 
@@ -141,7 +141,7 @@ jQuery(document).ready(function ($) {
 
     function crb_detect_show_options_edited() {
         if ($('#crb-meta-show').length > 0) {
-            $('#crb-meta-show').change(function () {
+            $('#crb-meta-show').on("change",function () {
                 $('#crb-meta-show-edited').prop('checked', true);
             })
         }
@@ -158,21 +158,21 @@ jQuery(document).ready(function ($) {
 
         timeOutLinksChecker(T_WAIT_SHOW_PANEL);
 
-        $(cl_crb_metabox).unbind().on('change', function () {
+        $(cl_crb_metabox).off().on('change', function () {
             timeOutLinksChecker(0);
             fcl_update_meta_visual();
         })
 
-        $('#crb-meta-use-manual').unbind().on('change', function () {
+        $('#crb-meta-use-manual').off().on('change', function () {
             fcl_update_meta_visual();
         })
 
         // incoming stats
-        $('#links-count-targets').unbind().click(function () {
+        $('#links-count-targets').off().on("click",function () {
             fcl_toggle_links_stats();
         })
 
-        $('.link-suggestions').unbind().click(function (e) {
+        $('.link-suggestions').off().on("click",function (e) {
             // remember scroll position
             cl_articles_scrolltop = $('#cherrylink_meta_inside').scrollTop();
             // item contains all the data about the article: titles, url, etc
@@ -195,19 +195,19 @@ jQuery(document).ready(function ($) {
         });
 
         // View article front
-        // $('.link-preview').unbind().click(function () {
+        // $('.link-preview').off().on("click",function () {
         //     let url = $(this).parent().parent().find('div.linkate-link').attr('data-url');
         //     window.open(url, '_blank');
         // });
 
         // Edit article
-        $('.link-preview').unbind().click(function () {
+        $('.link-preview').off().on("click",function () {
             let id = $(this).parent().parent().find('div.linkate-link').attr('data-postid');
             let url = '/wp-admin/post.php?action=edit&post=' + id;
             window.open(url, '_blank');
         });
 
-        $('.link-counter').unbind().click(function () {
+        $('.link-counter').off().on("click",function () {
             if ($(this).hasClass('link-counter-good') || $(this).hasClass('link-counter-bad')) {
                 let parent = $(this).parent()[0];
                 let url = '';
@@ -226,7 +226,7 @@ jQuery(document).ready(function ($) {
         });
 
         if ($('.link-add-to-block').length > 0) { // For Related Block
-            $('.link-add-to-block').unbind().click(function () {
+            $('.link-add-to-block').off().on("click",function () {
                 let post_id = $(this).parent().parent().find('div.linkate-link').attr('data-postid');
                 let title = $(this).parent().parent().find('div.linkate-link').attr('data-title');
                 let this_string = post_id + "[|]" + title + "[|]";
@@ -246,26 +246,33 @@ jQuery(document).ready(function ($) {
             });
         }
         if ($('.link-del-from-block').length > 0) { // For Related Block
-            $('.link-del-from-block').unbind().click(function () {
+            $('.link-del-from-block').off().on("click",function () {
                 let post_id = $(this).parent().parent().find('div.linkate-link').attr('data-postid');
                 let title = $(this).parent().parent().find('div.linkate-link').attr('data-title');
                 crb_remove_from_block(post_id)
             });
         }
 
-        $('#hide_that_exists').change(function () {
+        $('#hide_that_exists').on("change",function () {
             timeOutLinksFilter(T_WAIT_FILTER_CB);
         });
-        $('#show_that_exists').change(function () {
+        $('#show_that_exists').on("change",function () {
             timeOutLinksFilter(T_WAIT_FILTER_CB);
         });
-        $(cl_quick_cat_select).change(function () {
+        $(cl_quick_cat_select).on("change",function () {
             timeOutLinksFilter(T_WAIT_FILTER_CB);
         });
         $('#filter_by_title').on('input propertychange', function () {
-            timeOutLinksFilter(T_WAIT_FILTER);
+            let selected_tab = document.querySelector('.linkate-tab-selected')
+            
+            if (selected_tab.classList.contains('tab-articles')) {
+                timeOutLinksCustomText(T_WAIT_FILTER);
+            } else {
+                // taxonomies is active
+                timeOutLinksFilter(T_WAIT_FILTER);
+            }
         });
-        $('.filter-clear-box').click(function (e) {
+        $('.filter-clear-box').on("click",function (e) {
             $('#filter_by_title').val("");
             $('#filter_by_title').trigger("propertychange");
         })
@@ -315,11 +322,11 @@ jQuery(document).ready(function ($) {
             }
         }
 
-        cl_list_links.unbind().click(function (e) {
+        cl_list_links.off().on("click",function (e) {
             prepareLinkTemplate(e, false);
         });
 
-        cl_list_terms.unbind().click(function (e) {
+        cl_list_terms.off().on("click",function (e) {
             prepareLinkTemplate(e, true);
         });
 
@@ -333,7 +340,7 @@ jQuery(document).ready(function ($) {
         function fcl_toggle_suggestions_tab(div, single_words, multi_words) {
             let ankors_in_use = fcl_getAllAnkorsInUse(cl_editor_lastfocus_html_content);
             let insert_button = '<div class="suggestion-insert-anywhere" data-url="' + $(div).parent().parent().find('.linkate-link').attr('data-url') + '" title="Запасная кнопка, может пригодится, если вы выделили кусок текста вручную">&#9088; Вставить вокруг выделения</div>';
-            let reindex_link = window.location.href.replace(window.location.href.slice(window.location.href.indexOf('/wp-admin/') + 10), 'options-general.php?page=linkate-posts&subpage=other');
+            let reindex_link = window.location.href.replace(window.location.href.slice(window.location.href.indexOf('/wp-admin/') + 10), 'options-general.php?page=cherrylink-pro&subpage=other');
             let panel_header = (single_words.length > 0 || multi_words.length > 0) ? 'Найдены предполагаемые анкоры для: <strong>' + $(div).parent().parent().find('.linkate-link').attr('data-titleseo') + '</strong>' + insert_button : '<strong>Подсказки не найдены<br>Если вы видите эту надпись у всех ссылок, возможно вам нужно изменить <a target="_blank" href="' + reindex_link + '">настройки доноров подсказок</a>.</strong>';
             let panel = '<div class="suggestions-panel"><div class="suggestions-panel-content"><div class="suggestions-panel-header">' + panel_header + '</div>';
             if (ankors_in_use.length > 0) {
@@ -393,7 +400,7 @@ jQuery(document).ready(function ($) {
             $(".suggestion-select-option").off("mouseenter mouseleave").hover(function () {
                 fcl_findAndSelectSuggestionDropDown(this);
             })
-            $(".suggestion-select-option-text").click(function () {
+            $(".suggestion-select-option-text").on("click",function () {
                 fcl_suggestionFindandInsertLink($(this).parent());
             })
         }
@@ -417,27 +424,27 @@ jQuery(document).ready(function ($) {
         }
 
         function fcl_enableSuggestionSwitches() {
-            $('.words-in-use-show-btn').unbind().click(function () {
+            $('.words-in-use-show-btn').off().on("click",function () {
                 $(this).prev().find('li[class*="suggestions-word-in-use-hide"]').show();
                 $(this).remove();
             })
 
-            $('.suggestions-panel-back').unbind().click(function () {
+            $('.suggestions-panel-back').off().on("click",function () {
                 $('.suggestions-panel').remove();
                 fcl_toggleOnOffGeneralUI(false);
                 fcl_cleanSuggentionSpans();
                 return false;
             })
-            $('.suggestion-find').unbind().click(function (e) {
+            $('.suggestion-find').off().on("click",function (e) {
                 fcl_findAndSelectSuggestionDropDown($(this).parent().parent());
             })
-            $('.suggestion-insert').unbind().click(function (e) {
+            $('.suggestion-insert').off().on("click",function (e) {
                 let el = $(this).parent().parent();
                 fcl_suggestionFindandInsertLink(el);
             })
 
-            $('.suggestion-stop').unbind().click(function (e) {
-                let reindex_link = window.location.href.replace(window.location.href.slice(window.location.href.indexOf('/wp-admin/') + 10), 'options-general.php?page=linkate-posts&subpage=other');
+            $('.suggestion-stop').off().on("click",function (e) {
+                let reindex_link = window.location.href.replace(window.location.href.slice(window.location.href.indexOf('/wp-admin/') + 10), 'options-general.php?page=cherrylink-pro&subpage=other');
                 let word = $(this).parent().parent().attr("data-text");
                 e.preventDefault();
 
@@ -465,7 +472,7 @@ jQuery(document).ready(function ($) {
                 });
             })
 
-            $('.suggestion-insert-anywhere').unbind().click(function (e) {
+            $('.suggestion-insert-anywhere').off().on("click",function (e) {
                 if (fcl_isTinyMCE()) {
                     fcl_insertSuggestionTinyMCE(cl_suggestion_template_object.temp_before, cl_suggestion_template_object.temp_after);
                     tinymce.activeEditor.fire('change');
@@ -510,7 +517,7 @@ jQuery(document).ready(function ($) {
             }
         }
 
-        $('.suggestions-panel-close').unbind().click(function () {
+        $('.suggestions-panel-close').off().on("click",function () {
             $(this).remove();
         })
 
@@ -810,16 +817,18 @@ jQuery(document).ready(function ($) {
     $('.container-articles').show();
     $('.container-taxonomy').hide();
 
-    $('div.tab').unbind().click(function () {
+    $('div.tab').off().on("click",function () {
         if ($(this).hasClass('tab-articles')) {
             $('.container-articles').show();
             $('.container-taxonomy').hide();
+            $('.quick-cat-filter').show();
             $('div.tab-articles').addClass('linkate-tab-selected');
             $('div.tab-taxonomy').removeClass('linkate-tab-selected');
             // $(cl_quick_cat_select).show();
         } else {
             $('.container-articles').hide();
             $('.container-taxonomy').show();
+            $('.quick-cat-filter').hide();
             $('div.tab-articles').removeClass('linkate-tab-selected');
             $('div.tab-taxonomy').addClass('linkate-tab-selected');
             // $(cl_quick_cat_select).hide();
@@ -1389,8 +1398,10 @@ jQuery(document).ready(function ($) {
         let curr_post_id;
         let limit = list.length;
 
-        let hide_exist = $('#hide_that_exists').is(':checked');
-        let show_exist = $('#show_that_exists').is(':checked');
+        let hide_exist = true
+        let show_exist = true
+        // let hide_exist = $('#hide_that_exists').is(':checked');
+        // let show_exist = $('#show_that_exists').is(':checked');
         let filter_word = $('#filter_by_title').val().toLowerCase();
 
         let el, text, contains, hide;
@@ -1439,8 +1450,10 @@ jQuery(document).ready(function ($) {
     function fcl_filterLinks(list) {
         let el;
 
-        let hide_exist = $('#hide_that_exists').is(':checked');
-        let show_exist = $('#show_that_exists').is(':checked');
+        let hide_exist = true;
+        let show_exist = true;
+        // let hide_exist = $('#hide_that_exists').is(':checked');
+        // let show_exist = $('#show_that_exists').is(':checked');
         let filter_word = $('#filter_by_title').val().toLowerCase().replace(/Ё/g, 'Е').trim();
 
         for (let i = list.length - 1; i >= 0; i--) {
@@ -1551,6 +1564,15 @@ jQuery(document).ready(function ($) {
         }, delay);
     }
 
+    function timeOutLinksCustomText(delay) { // wait after input some time, if input repeats - null timer and wait again, then call func
+        if (cl_timerFilter) {
+            clearTimeout(cl_timerFilter);
+        }
+        cl_timerFilter = setTimeout(function () {
+            ajax_get_data_from_server();
+        }, delay);
+    }
+
     function timeOutTotalCount(delay, content) { // to prevent second call of the function (it's called for links and terms separately)
         if (cl_timerTotalLinks) {
             clearTimeout(cl_timerTotalLinks);
@@ -1570,7 +1592,7 @@ jQuery(document).ready(function ($) {
 
     function fcl_setup_main_btns() {
         // set action to the media button to open cherrylink panel
-        cl_open_button.click(function () {
+        cl_open_button.on("click",function () {
             // Looking for links in text
             if (fcl_get_data_offset === 0) { // load only first time
                 ajax_get_data_from_server();
@@ -1585,11 +1607,11 @@ jQuery(document).ready(function ($) {
             }
             $('#linkate-box').toggleClass('hide-or-show');
         });
-        $(".linkate-close-btn").click(function () {
+        $(".linkate-close-btn").on("click",function () {
             $('#linkate-box').toggleClass('hide-or-show');
         });
         // set action to the 'load more' button
-        $('.load-more-text').click(function () {
+        $('.load-more-text').on("click",function () {
             ajax_get_data_from_server();
         });
     }
@@ -1605,8 +1627,11 @@ jQuery(document).ready(function ($) {
             'action': 'get_linkate_links',
             'post_id': this_id,
             'offset': fcl_get_data_offset,
-            'is_term': fcl_is_term(),
+            'is_term': fcl_is_term(),  
         };
+        if ($('#filter_by_title').val()) {
+            ajax_data.custom_text = $('#filter_by_title').val()
+        }
         // show loading css
         $('.lds-ellipsis').removeClass('lds-ellipsis-hide');
         $('.load-more-text').addClass('lds-ellipsis-hide');
@@ -1669,7 +1694,7 @@ jQuery(document).ready(function ($) {
                 fcl_markIncomingLinks();
             });
         } else {
-            let host = window.location.href.replace(window.location.href.slice(window.location.href.indexOf('/wp-admin/') + 10), 'options-general.php?page=linkate-posts');
+            let host = window.location.href.replace(window.location.href.slice(window.location.href.indexOf('/wp-admin/') + 10), 'options-general.php?page=cherrylink-pro');
             $('#links-count-targets').html('<a style="font-weight:bold;color:white;" href="' + host + '" title="Нет данных, перейдите по ссылки для настройки">??</a>');
         }
 

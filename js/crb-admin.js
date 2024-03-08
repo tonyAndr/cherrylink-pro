@@ -4,6 +4,6 @@ jQuery(document).ready(function($){
     // if (loaded_css && !loaded_css.includes(chosen_css) && !loaded_css.includes(chosen_css.replace('.css', '-important.css')))
     //     location.reload();
 
-    if (window.location.href.includes('page=linkate-posts&subpage=output_block') && $('div.crb-update').length > 0)
+    if (window.location.href.includes('page=cherrylink-pro&subpage=output_block') && $('div.crb-update').length > 0)
         location.reload();
 });

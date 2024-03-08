@@ -14,6 +14,7 @@ jQuery(document).ready(function ($) {
         $('.button-reindex').hide();
         index_serialized_form = $("#options_form").serialize();
         $("input").prop('disabled', true);
+        $('#reindex_progress_text').html("Сканирование начинается...");
         index_get_posts_count();
         php_execution_time = 0;
         console.time('overall_time')
@@ -52,13 +53,13 @@ jQuery(document).ready(function ($) {
             $('#reindex_progress').hide();
             $('#reindex_progress').val(0);
 
-            $('.button-reindex').show();
+            // $('.button-reindex').show();
             $("input").prop('disabled', false);
             console.log("Index created successfully");
 
-            let output = `Создание индекса ссылок завершено.`
+            let output = `Сканирование завершено успешно!`
             $('#reindex_progress_text').html(output);
-            index_get_overused_words();
+            // index_get_overused_words();
             index_offset = 0;
 
             $("#cherry_index_status").html(" обновите страницу...")
@@ -76,7 +77,7 @@ jQuery(document).ready(function ($) {
             $("input").prop('disabled', false);
             console.log("Index creation failed");
 
-            let output = `Что-то пошло не так при создании индекса. Проверьте консоль браузера (F12), чтобы узнать больше.`
+            let output = `Что-то пошло не так при сканировании. Проверьте консоль браузера (F12), чтобы узнать больше.`
             $('#reindex_progress_text').html(output);
             return;
         }
@@ -128,7 +129,7 @@ jQuery(document).ready(function ($) {
         current = current > 100 ? 100 : current;
         $('#reindex_progress').prop('max', 100);
         $('#reindex_progress').val(current);
-        let output = `Обработано ${index_offset} из ${index_posts_count} записей (${current}%). `
+        let output = `Обработано ${index_offset} из ${index_posts_count} записей (${current}%)... `
         $('#reindex_progress_text').html(output);
     }
 
