@@ -324,6 +324,7 @@ function fill_options($options)
     if (!isset($options['consider_max_incoming_links'])) $options['consider_max_incoming_links'] = 'false';
     if (!isset($options['max_incoming_links'])) $options['max_incoming_links'] = 20;
     if (!isset($options['template_image_size'])) $options['template_image_size'] = '';
+    if (!isset($options['show_cat_filter'])) $options['show_cat_filter'] = 'false';
     update_option('linkate-posts', $options);
     return $options;
 }

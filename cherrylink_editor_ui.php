@@ -32,8 +32,8 @@ function get_linkate_links()
         $custom_text = isset($_POST['custom_text']) ? $_POST['custom_text'] : '';
         $mode = 'classic';
     }
+    cherry_write_log($data);
     $data =  linkate_posts("manual_ID=" . $post_id . "&is_term=" . $is_term . "&offset=" . $offset . "&mode=" . $mode . "&custom_text=" . $custom_text . "&");
-    // cherry_write_log($data);
     wp_send_json($data);
 }
 
@@ -126,6 +126,7 @@ function linkate_send_options_frontend()
         cherrylink_options['use_stemming'] = <?php echo '"' . $options['use_stemming'] . '"'; ?>;
         cherrylink_options['multilink'] = <?php echo '"' . $options['multilink'] . '"'; ?>;
         cherrylink_options['term_length_limit'] = <?php echo $options['term_length_limit']; ?>;
+        cherrylink_options['show_cat_filter'] = <?php echo $options['show_cat_filter']; ?>;
         cherrylink_options['templates'] = {
             isH1: '<?php echo $options['output_template'] === "h1" ? 'true' : 'false'; ?>',
             term: {
@@ -175,7 +176,11 @@ function cherrylink_classiceditor_panel()
         <div class="inside" id="cherrylink_meta_inside">
             <span id="link_template" data-before="<?php echo $options['link_before']; ?>" data-after="<?php echo $options['link_after']; ?>" data-temp-alt="<?php echo $options['link_temp_alt']; ?>" hidden></span>
             <span id="term_template" data-before="<?php echo $options['term_before']; ?>" data-after="<?php echo $options['term_after']; ?>" data-term-temp-alt="<?php echo $options['term_temp_alt']; ?>" hidden></span>
-            <?php echo create_quick_cat_select(); ?>
+            <?php 
+                if (isset($options['show_cat_filter']) && ($options['show_cat_filter'] === 'true' || $options['show_cat_filter'] === true)) {
+                    echo create_quick_cat_select(); 
+                }
+            ?>
             <div class="linkate-box-container container-articles">
 
                 <div id="linkate-links-list"></div>

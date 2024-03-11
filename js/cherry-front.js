@@ -1469,19 +1469,34 @@ jQuery(document).ready(function ($) {
     }
 
     function fcl_hideItem(el, hide_exist, show_exist, filter_word) {
-        let text, contains, hide, hide_not_exist, dont_show_cat;
-        let cat_el = $("#quick_cat_filter option:selected")[0]; // selected item
-        let parent = cat_el.parentElement;
-        let childrenSize = parent.childElementCount;
-        let cat = $(cat_el).val(); // selected val + sub val
-        if (cat !== "0" && cat_el.index < childrenSize - 1) {
-            let cat_class_ind = parseInt($(cat_el).attr("class").substr(11)); // selected class index
-            let next_el = $(cat_el).next(); // next sibling
-            while (parseInt($(next_el).attr("class").substr(11)) > cat_class_ind) { // while next element has greater sub_index - concat
-                cat += "," + $(next_el).val();
-                next_el = $(next_el).next();
+        let text, contains, hide, hide_not_exist, dont_show_cat, cat, cat_found;
+
+        if (document.querySelector("#quick_cat_filter")) {
+            let cat_el = $("#quick_cat_filter option:selected")[0]; // selected item
+            let parent = cat_el.parentElement;
+            let childrenSize = parent.childElementCount;
+            let cat = $(cat_el).val(); // selected val + sub val
+            if (cat !== "0" && cat_el.index < childrenSize - 1) {
+                let cat_class_ind = parseInt($(cat_el).attr("class").substr(11)); // selected class index
+                let next_el = $(cat_el).next(); // next sibling
+                while (parseInt($(next_el).attr("class").substr(11)) > cat_class_ind) { // while next element has greater sub_index - concat
+                    cat += "," + $(next_el).val();
+                    next_el = $(next_el).next();
+                }
+                cat = cat.split(",");
             }
-            cat = cat.split(",");
+            let cat_found = false;
+            if (!el.classList.contains("link-term")) {
+                let link_cats = $(el).attr("data-category").split(", ");
+                link_cats.forEach(function (item, index) {
+                    if (cat.includes(item)) {
+                        cat_found = true;
+                    }
+                });
+            }
+        } else {
+            cat = '0';
+            cat_found = true;
         }
 
         text = el.querySelector('.link-title').innerHTML.toUpperCase().replace(/Ё/g, 'Е');
@@ -1493,15 +1508,7 @@ jQuery(document).ready(function ($) {
 
         hide_not_exist = !show_exist && !el.querySelector('.link-title').classList.contains(cl_exists_class);
 
-        let cat_found = false;
-        if (!el.classList.contains("link-term")) {
-            let link_cats = $(el).attr("data-category").split(", ");
-            link_cats.forEach(function (item, index) {
-                if (cat.includes(item)) {
-                    cat_found = true;
-                }
-            });
-        }
+
 
         dont_show_cat = !el.classList.contains("link-term") && cat !== "0" && !cat_found;
 

@@ -253,6 +253,7 @@ class CL_Index_Helpers
     }
 
     public function get_indexable_posts_count() {
-        return $this->wpdb->get_var("SELECT COUNT(*) FROM $this->wpdb->posts WHERE `post_type` not in ('attachment', 'revision', 'nav_menu_item', 'wp_block')");
+        $table = $this->wpdb->posts;
+        return $this->wpdb->get_var("SELECT COUNT(*) FROM $table WHERE `post_type` not in ('attachment', 'revision', 'nav_menu_item', 'wp_block')");
     }
 }

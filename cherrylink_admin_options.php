@@ -196,7 +196,7 @@ function linkate_posts_main_options_subpage()
     // Create options file to export
     if (!isset($_POST['import_settings'])) {
         $str = http_build_query($options);
-        $res = file_put_contents(CHERRYLINK_DIR_URL . '/export_options.txt', $str);
+        $res = file_put_contents(CHERRYLINK_DIR . '/export_options.txt', $str);
     }
 
     if (isset($_POST['import_settings']) && isset($_FILES['upload_options'])) {
@@ -340,7 +340,8 @@ function linkate_posts_expert_options_subpage()
             'weight_title',
             'weight_content',
             'weight_tags',
-            'ignore_relevance'
+            'ignore_relevance',
+            'show_cat_filter'
         ));
 
         $wcontent = $options['weight_content'] + 0.0001;
@@ -374,7 +375,7 @@ function linkate_posts_expert_options_subpage()
                     </div>
                 </div>
                 <div class="<?= CL_TWC::$CARD ?>">
-                    <h2 id="anchor-editor" class="<?= CL_TWC::$H2 ?>">Настройка ссылок в редакторе</h2>
+                    <h2 id="anchor-editor" class="<?= CL_TWC::$H2 ?>">Настройка панель CherryLink в редакторе</h2>
                     <table class="optiontable form-table">
                         <?php
                         link_cf_display_output_template($options['output_template']);
@@ -397,6 +398,7 @@ function linkate_posts_expert_options_subpage()
                     <div class="spoiler_filter">
                         <table class="optiontable form-table">
                             <?php
+                            link_cf_display_show_catergory_filter($options['show_cat_filter']);
                             link_cf_display_show_custom_posts($options['show_customs']);
                             link_cf_display_singleword_suggestions($options['singleword_suggestions']);
                             link_cf_display_max_incoming_links($options['consider_max_incoming_links'], $options['max_incoming_links']);

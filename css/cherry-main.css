@@ -393,12 +393,13 @@
     margin: 0;
     border: none;
     border-radius: 0;
+    font-size: 18px;
 }
 
 .filter-clear-box {
     position: absolute;
-    right: 5px;
-    padding-top: 6px;
+    right: 11px;
+    padding-top: 9px;
     color: lightgray;
 }
 
@@ -437,7 +438,7 @@
 .linkate-tabs .tab-articles {
     float: left;
     width: 50%;
-    padding: 0.2em;
+    padding: 0.8em;
     display: flex;
     justify-content: center;
     border-right: 1px #e6e6e6 solid;
@@ -446,7 +447,7 @@
 .linkate-tabs .tab-taxonomy {
     float: right;
     width: 50%;
-    padding: 0.2em 0.2em 0.2em 0.5em;
+    padding: 0.8em;
     display: flex;
     justify-content: center;
 }

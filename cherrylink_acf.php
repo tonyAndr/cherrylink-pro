@@ -466,6 +466,24 @@ function link_cf_display_show_custom_posts($show_customs)
     endif;
 }
 
+function link_cf_display_show_catergory_filter($show_cat_filter = 'false')
+{
+    ?>
+    <tr valign="top">
+        <th scope="row"><label for="show_cat_filter"><?php _e('Показать на панели фильтр ссылок по рубрике', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
+        <td>
+            <select name="show_cat_filter" id="show_cat_filter">
+                <option <?php if ($show_cat_filter == 'false') {
+                            echo 'selected="selected"';
+                        } ?> value="false">Нет</option>
+                <option <?php if ($show_cat_filter == 'true') {
+                            echo 'selected="selected"';
+                        } ?> value="true">Да</option>
+            </select>
+        </td>
+    </tr>
+<?php
+}
 function link_cf_display_quickfilter_dblclick($quickfilter_dblclick)
 {
     ?>
@@ -551,7 +569,7 @@ function link_cf_display_match_cat($match_cat)
 {
 ?>
     <tr valign="top">
-        <th scope="row"><label for="match_cat"><?php _e('Только ссылки из той же категории?', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
+        <th scope="row"><label for="match_cat"><?php _e('Только ссылки из той же рубрики?', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
         <td>
             <select name="match_cat" id="match_cat">
                 <option <?php if ($match_cat == 'false') {
@@ -601,7 +619,7 @@ function link_cf_display_anons_len($len)
 
 function link_cf_template_image_size($template_image_size)
 {
-    $sizes = CL_RB_Admin_Area::get_image_sizes();
+    $sizes = linkate_get_image_sizes();
 ?>
     <tr valign="top">
         <th scope="row"><label for="template_image_size">Размер изображения для тега {imagesrc} для шаблонов</label></th>
