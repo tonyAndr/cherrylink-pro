@@ -3,7 +3,7 @@
 Plugin Name: CherryLink Pro
 Plugin URI: http://seocherry.ru/
 Description: Плагин для упрощения ручной внутренней перелинковки. Поиск релевантных ссылок, ускорение монотонных действий, гибкие настройки, удобная статистика и экспорт.
-Version: 2.4.1
+Version: 0.9.0
 Author: Anton SeoCherry.ru
 Author URI: http://seocherry.ru/
 Text Domain: cherrylink-td
@@ -152,27 +152,27 @@ class LinkatePosts
                 // replace everything with custom text
                 $contentterms = $cleaned_custom_text;
                 $titleterms = $cleaned_custom_text;
-                $tagterms = $cleaned_custom_text;
+                $customterms = $cleaned_custom_text;
                 $suggestions = $cleaned_custom_text;
             } else { // proceed the normal way
-                list($contentterms, $titleterms, $tagterms, $suggestions) = $index_helpers->linkate_sp_terms_by_freq($postid, $options['num_terms'], $is_term);
+                list($contentterms, $titleterms, $customterms, $suggestions) = $index_helpers->linkate_sp_terms_by_freq($postid, $options['num_terms'], $is_term);
             }
 
             // these should add up to 1.0
             $weight_content = $options['weight_content'];
             $weight_title = $options['weight_title'];
-            $weight_tags = $options['weight_tags'];
+            $weight_custom = $options['weight_custom'];
             // below a threshold we ignore the weight completely and save some effort
             if ($weight_content < 0.001) $weight_content = (int) 0;
             if ($weight_title < 0.001) $weight_title = (int) 0;
-            if ($weight_tags < 0.001) $weight_tags = (int) 0;
+            if ($weight_custom < 0.001) $weight_custom = (int) 0;
 
-            $count_content = substr_count($contentterms, ' ') + 1;
-            $count_title = substr_count($titleterms, ' ') + 1;
-            $count_tags  = substr_count($tagterms, ' ') + 1;
+            $count_content = mb_substr_count($contentterms, ' ') + 1;
+            $count_title = mb_substr_count($titleterms, ' ') + 1;
+            $count_custom  = mb_substr_count($customterms, ' ') + 1;
             if ($weight_content) $weight_content = 57.0 * $weight_content / $count_content;
             if ($weight_title) $weight_title = 18.0 * $weight_title / $count_title;
-            if ($weight_tags) $weight_tags = 24.0 * $weight_tags / $count_tags;
+            if ($weight_custom) $weight_custom = 24.0 * $weight_custom / $count_custom;
 
             $rel_ids = false;
             $in_relevant_clause = '';
@@ -188,8 +188,8 @@ class LinkatePosts
                 } else {
 
                     $sql = "SELECT pID FROM (SELECT pID, ";
-                    $sql .= link_cf_score_fulltext_match($table_name, $weight_title, $titleterms, $weight_content, $contentterms, $weight_tags, $tagterms, $match_against_title);
-                    $sql .= " WHERE " . link_cf_where_fulltext_match($weight_title, $titleterms, $weight_content, $contentterms, $weight_tags, $tagterms, $match_against_title);
+                    $sql .= link_cf_score_fulltext_match($table_name, $weight_title, $titleterms, $weight_content, $contentterms, $weight_custom, $customterms, $match_against_title);
+                    $sql .= " WHERE " . link_cf_where_fulltext_match($weight_title, $titleterms, $weight_content, $contentterms, $weight_custom, $customterms, $match_against_title);
                     $sql .= " AND pID <> $postid AND is_term = 0 ORDER BY score DESC LIMIT 0, 1000) as linkate_table";
                     _cherry_debug(__FUNCTION__, $sql, 'wp_linkate_posts SQL query');
                     $EXEC_TIME = microtime(true);
@@ -294,9 +294,9 @@ class LinkatePosts
 
         _cherry_debug(__FUNCTION__, $presentation_mode, 'Как обработать результаты?');
         switch ($presentation_mode) {
-            case 'related_block':
-                return CL_Related_Block::prepare_related_block($postid, $results, $option_key, $options);
-                break;
+            // case 'related_block':
+            //     return CL_Related_Block::prepare_related_block($postid, $results, $option_key, $options);
+            //     break;
             case 'gutenberg':
                 return LinkatePosts::prepare_for_cherry_gutenberg($results, $option_key, $options);
                 break;
@@ -427,7 +427,7 @@ function linkate_redirectToUpdatePlugin()
 
 function cherrylink_activation_notice()
 {
-    $options_meta = get_option('linkate_posts_meta');
+    $options_meta = get_option('linkate_posts_meta', []);
     $index_process_status = (isset($options_meta['indexing_process']) && !empty($options_meta['indexing_process'])) ? $options_meta['indexing_process'] : 'VALUE_NOT_EXIST';
 
 
@@ -488,7 +488,7 @@ function linkate_posts_wp_admin_style()
         wp_register_script('cherrylink-js-admin-stopwords', plugins_url('/js/cherry-admin-stopwords.js', __FILE__), array('jquery'), LinkatePosts::get_linkate_version());
         wp_register_script('cherrylink-js-admin-index', plugins_url('/js/cherry-admin-index.js', __FILE__), array('jquery', 'cherrylink-js-admin-stopwords'), LinkatePosts::get_linkate_version());
 
-        $options = (array) get_option('linkate-posts');
+        $options = (array) get_option('linkate-posts', []);
         $scheme_exists = array("state" => isset($options['linkate_scheme_exists']) ? true : false);
         wp_localize_script('cherrylink-js-admin', 'scheme', $scheme_exists);
 
@@ -503,15 +503,17 @@ function linkate_posts_wp_admin_style()
 
 function linkate_posts_init()
 {
+    global $wpdb;
     load_plugin_textdomain(CHERRYLINK_TEXT_DOMAIN);
 
     LinkatePosts::get_linkate_version();
 
     add_action('admin_notices', 'cherrylink_activation_notice');
 
+    $cl_index_helper = new CL_Index_Helpers(null, null, $wpdb);
     //install the actions to keep the index up to date
     add_action('save_post', 'linkate_sp_save_index_entry', 1, 3);
-    add_action('delete_post', array('CL_Index_Helpers', 'linkate_sp_delete_index_entry'), 1);
+    add_action('delete_post', array($cl_index_helper, 'linkate_sp_delete_index_entry'), 1);
 
     // add_action('create_term', 'linkate_sp_save_index_entry_term', 1, 3);
     // add_action('edited_term', 'linkate_sp_save_index_entry_term', 1, 3);

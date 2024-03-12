@@ -16,7 +16,7 @@ function linkate_sp_save_index_entry($postID, $postObj, $updated)
     global $wpdb, $table_prefix;
     $table_name = $table_prefix . 'linkate_posts';
 
-    $options = get_option('linkate-posts');
+    $options = get_option('linkate-posts', []);
 
     $use_stemming = $options['use_stemming'] === "true";
     $stemmer = new Stem\LinguaStemRu();
@@ -62,17 +62,21 @@ function linkate_sp_save_index_entry($postID, $postObj, $updated)
     }
     list($title, $title_sugg) = $index_helpers->linkate_sp_get_title_terms($title, $min_len, $linkate_overusedwords, $clean_suggestions_stoplist);
 
-    // Extract ancor terms
-    $suggestions = $index_helpers->linkate_sp_prepare_suggestions($title_sugg, $content_sugg, $suggestions_donors_src, $suggestions_donors_join);
 
-    $tags = $index_helpers->linkate_sp_get_tag_terms($postID);
+    // $tags = $index_helpers->linkate_sp_get_tag_terms($postID);
+
+    list($custom_fields, $custom_fields_sugg) = $index_helpers->collect_custom_fields($postObj, $linkate_overusedwords);
+
+    // Extract ancor terms
+    $suggestions = $index_helpers->linkate_sp_prepare_suggestions($title_sugg, $content_sugg, $custom_fields_sugg, $suggestions_donors_src, $suggestions_donors_join);
+
     //check to see if the field is set
     $pid = $wpdb->get_var("SELECT pID FROM $table_name WHERE pID=$postID limit 1");
     //then insert if empty
     if (is_null($pid)) {
-        $wpdb->query("INSERT INTO $table_name (pID, content, title, tags, suggestions) VALUES ($postID, \"$content\", \"$title\", \"$tags\", \"$suggestions\")");
+        $wpdb->query("INSERT INTO $table_name (pID, content, title, custom_fields, suggestions) VALUES ($postID, \"$content\", \"$title\", \"$custom_fields\", \"$suggestions\")");
     } else {
-        $wpdb->query("UPDATE $table_name SET content=\"$content\", title=\"$title\", tags=\"$tags\", suggestions=\"$suggestions\" WHERE pID=$postID");
+        $wpdb->query("UPDATE $table_name SET content=\"$content\", title=\"$title\", custom_fields=\"$custom_fields\", suggestions=\"$suggestions\" WHERE pID=$postID");
     }
     return $postID;
 }
@@ -82,7 +86,7 @@ function linkate_sp_save_index_entry($postID, $postObj, $updated)
 // function linkate_sp_save_index_entry_term($term_id, $tt_id, $taxonomy) {
 // 	global $wpdb, $table_prefix;
 // 	$table_name = $table_prefix . 'linkate_posts';
-// 	$options = get_option('linkate-posts');
+// 	$options = get_option('linkate-posts', []);
     
 //     $use_stemming = $options['use_stemming'] === "true";
 //     $stemmer = new Stem\LinguaStemRu();

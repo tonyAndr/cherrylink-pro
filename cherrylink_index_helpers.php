@@ -23,26 +23,29 @@ class CL_Index_Helpers
         $this->table_prefix = $wpdb->prefix;
     }
 
-    public function prepare_stopwords() {
+    public function prepare_stopwords()
+    {
         $words_table = $this->table_prefix . "linkate_stopwords";
         $black_words = $this->wpdb->get_col("SELECT stemm FROM $words_table WHERE is_white = 0 GROUP BY stemm");
         $white_words = $this->wpdb->get_col("SELECT word FROM $words_table WHERE is_white = 1");
         $linkate_overusedwords["black"] = array_flip(array_filter($black_words));
         $linkate_overusedwords["white"] = array_flip(array_filter($white_words));
+        return $linkate_overusedwords;
     }
 
-    public function linkate_sp_terms_by_freq($ID, $num_terms = 50, $is_term = 0) {
+    public function linkate_sp_terms_by_freq($ID, $num_terms = 150, $is_term = 0)
+    {
         if (!$ID) return array('', '', '', '');
         $table_name = $this->table_prefix . 'linkate_posts';
         $terms = '';
-        $results = $this->wpdb->get_results("SELECT title, content, tags, suggestions FROM $table_name WHERE pID=$ID AND is_term=$is_term LIMIT 1", ARRAY_A);
+        $results = $this->wpdb->get_results("SELECT title, content, custom_fields, suggestions FROM $table_name WHERE pID=$ID AND is_term=$is_term LIMIT 1", ARRAY_A);
         if ($results) {
             $word = strtok($results[0]['content'], ' ');
             $n = 0;
             $wordtable = array();
             while ($word !== false) {
-                if(!array_key_exists($word,$wordtable)){
-                    $wordtable[$word]=0;
+                if (!array_key_exists($word, $wordtable)) {
+                    $wordtable[$word] = 0;
                 }
                 $wordtable[$word] += 1;
                 $word = strtok(' ');
@@ -50,17 +53,18 @@ class CL_Index_Helpers
             arsort($wordtable);
             if ($num_terms < 1) $num_terms = 1;
             $wordtable = array_slice($wordtable, 0, $num_terms);
-    
+
             foreach ($wordtable as $word => $count) {
                 $terms .= ' ' . $word;
             }
-    
+
             $res[] = $terms;
             $res[] = $results[0]['title'];
-            $res[] = $results[0]['tags'];
+            $res[] = $results[0]['custom_fields'];
             $res[] = $results[0]['suggestions'];
-         }
-        return $res;
+            return $res;
+        }
+        return array('', '', '', '');
     }
 
     // // Extract the most popular words to make ankor suggestions 
@@ -89,19 +93,20 @@ class CL_Index_Helpers
     //     }
     //     return $terms;
     // }
-    public function linkate_sp_prepare_suggestions($title, $content, $suggestions_donors_src, $suggestions_donors_join) {
+    public function linkate_sp_prepare_suggestions($title, $content, $custom_fields, $suggestions_donors_src, $suggestions_donors_join)
+    {
         if (empty($suggestions_donors_src))
             return '';
-    
+
         $suggestions_donors_src = explode(',', $suggestions_donors_src);
-    
+
         // change old settings
         if (!in_array('title', $suggestions_donors_src) && !in_array('content', $suggestions_donors_src)) {
             $suggestions_donors_src = array('title');
         }
-    
+
         $array = array();
-        if (in_array('title',$suggestions_donors_src))
+        if (in_array('title', $suggestions_donors_src))
             $array[] = array_filter($title);
         if (in_array('content', $suggestions_donors_src)) {
             // get most used words from content
@@ -111,15 +116,23 @@ class CL_Index_Helpers
             $wordlist = array_keys($wordlist);
             $array[] = array_filter($wordlist);
         }
+        if (in_array('custom_fields', $suggestions_donors_src)) {
+            // get most used words from content
+            $wordlist = array_count_values($custom_fields);
+            arsort($wordlist);
+            $wordlist = array_slice($wordlist, 0, 20);
+            $wordlist = array_keys($wordlist);
+            $array[] = array_filter($wordlist);
+        }
         $array = array_filter($array);
         if (empty($array))
             return '';
-    
+
         $array = array_values($array);
         if (sizeof($array) === 1) {
             return implode(' ', array_unique($array[0]));
         }
-    
+
         if ($suggestions_donors_join == 'intersection') {
             $result = array_unique(array_intersect(...$array));
             return  implode(' ', $result);
@@ -228,32 +241,59 @@ class CL_Index_Helpers
         return $tags;
     }
 
-    
 
-    public function linkate_process_batch_overused_words ($batch_content_array, $common_words, $min_len, $black_words_common) {
+
+    public function linkate_process_batch_overused_words($batch_content_array, $common_words, $min_len, $black_words_common)
+    {
         foreach ($batch_content_array as $key => $word) {
             # code...
-            if (mb_strlen($word) > intval($min_len) && !array_key_exists($word,$black_words_common)) {
-                if(!array_key_exists($word,$common_words)){
-                    $common_words[$word]=0;
+            if (mb_strlen($word) > intval($min_len) && !array_key_exists($word, $black_words_common)) {
+                if (!array_key_exists($word, $common_words)) {
+                    $common_words[$word] = 0;
                 } else {
                     $common_words[$word] += 1;
                 }
             }
         }
         arsort($common_words);
-        $common_words = array_slice($common_words, 0 , 100);
+        $common_words = array_slice($common_words, 0, 100);
         return $common_words;
     }
 
-    public function linkate_sp_delete_index_entry($postID) {
+    public function linkate_sp_delete_index_entry($postID)
+    {
         $table_name = $this->table_prefix . 'linkate_posts';
         $this->wpdb->query("DELETE FROM $table_name WHERE pID = $postID ");
         return $postID;
     }
 
-    public function get_indexable_posts_count() {
+    public function get_indexable_posts_count()
+    {
         $table = $this->wpdb->posts;
         return $this->wpdb->get_var("SELECT COUNT(*) FROM $table WHERE `post_type` not in ('attachment', 'revision', 'nav_menu_item', 'wp_block')");
+    }
+
+    public function collect_custom_fields($post, $stopwords)
+    {
+        $custom_fields = (isset($this->options['index_custom_fields']) && !empty($this->options['index_custom_fields'])) ? $this->options['index_custom_fields'] : false;
+        if ($custom_fields === false) {
+            return ['', []];
+        }
+        $custom_fields = explode(PHP_EOL, $custom_fields);
+        $collected_text = '';
+
+        // could be real post object or limited version, check the date field cuz it exists only in real one
+        $real_post_object = isset($post->post_date) ? $post : get_post(intval($post->ID));
+
+        foreach ($custom_fields as $key => $field) {
+            $collected_text .= ' ' . @$real_post_object->{$field};
+        }
+
+        $tokens = mb_split("\W+", $this->linkate_sp_mb_clean_words($collected_text));
+        list($content, $content_sugg) = $this->linkate_sp_get_post_terms($tokens, $this->options['term_length_limit'], $stopwords, $this->options['clean_suggestions_stoplist']);
+        $content = iconv("UTF-8", "UTF-8//IGNORE", $content);
+        if (!$content) $content = '';
+
+        return [$content, $content_sugg];
     }
 }

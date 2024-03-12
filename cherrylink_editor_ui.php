@@ -32,7 +32,7 @@ function get_linkate_links()
         $custom_text = isset($_POST['custom_text']) ? $_POST['custom_text'] : '';
         $mode = 'classic';
     }
-    cherry_write_log($data);
+    // cherry_write_log($data);
     $data =  linkate_posts("manual_ID=" . $post_id . "&is_term=" . $is_term . "&offset=" . $offset . "&mode=" . $mode . "&custom_text=" . $custom_text . "&");
     wp_send_json($data);
 }
@@ -104,7 +104,7 @@ function add_linkate_button()
 
 function linkate_send_options_frontend()
 {
-    $options = (array) get_option('linkate-posts');
+    $options = (array) get_option('linkate-posts', []);
     global $post;
     $current_id = 0;
     if ($post)
@@ -146,7 +146,7 @@ function linkate_send_options_frontend()
 
 function cherrylink_classiceditor_panel()
 {
-    $options = (array) get_option('linkate-posts');
+    $options = (array) get_option('linkate-posts', []);
     $cl_exists_class = $options['multilink'] === 'checked' ? 'link-exists-multi' : 'link-exists';
 ?>
     <div id="linkate-box" class="linkate-custom-box">
@@ -176,10 +176,10 @@ function cherrylink_classiceditor_panel()
         <div class="inside" id="cherrylink_meta_inside">
             <span id="link_template" data-before="<?php echo $options['link_before']; ?>" data-after="<?php echo $options['link_after']; ?>" data-temp-alt="<?php echo $options['link_temp_alt']; ?>" hidden></span>
             <span id="term_template" data-before="<?php echo $options['term_before']; ?>" data-after="<?php echo $options['term_after']; ?>" data-term-temp-alt="<?php echo $options['term_temp_alt']; ?>" hidden></span>
-            <?php 
-                if (isset($options['show_cat_filter']) && ($options['show_cat_filter'] === 'true' || $options['show_cat_filter'] === true)) {
-                    echo create_quick_cat_select(); 
-                }
+            <?php
+            if (isset($options['show_cat_filter']) && ($options['show_cat_filter'] === 'true' || $options['show_cat_filter'] === true)) {
+                echo create_quick_cat_select();
+            }
             ?>
             <div class="linkate-box-container container-articles">
 

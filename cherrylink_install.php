@@ -18,7 +18,23 @@ function linkate_posts_install()
     global $wpdb, $table_prefix;
     $table_name = $table_prefix . 'linkate_posts';
 
+    // Create index on install if possible
     $create_index = false;
+
+    // Check if DB tables were created
+    $created_posts = false;
+    $created_scheme = false;
+    $created_stop = false;
+
+    $default_collation = "utf8mb4_unicode_520_ci";
+    $default_charset = "utf8mb4";
+    if (!$wpdb->has_cap('utf8mb4_520')) {
+        $default_collation = "utf8mb4_unicode_ci";
+        if (!$wpdb->has_cap('utf8mb4')) {
+            $default_collation = "utf8_general_ci";
+            $default_charset = "utf8";
+        }
+    }
 
     $errorlevel = error_reporting(0);
     $suppress = $wpdb->hide_errors();
@@ -30,19 +46,22 @@ function linkate_posts_install()
     } else {
         $create_index = true;
         $sql = "CREATE TABLE IF NOT EXISTS `$table_name` (
+
+				`id` bigint( 20 ) unsigned NOT NULL AUTO_INCREMENT,
 				`pID` bigint( 20 ) unsigned NOT NULL ,
 				`content` longtext NOT NULL ,
 				`title` text NOT NULL ,
-				`tags` text NOT NULL ,
+				`custom_fields` text NOT NULL ,
 				`is_term` tinyint DEFAULT false,
 				`suggestions` text NOT NULL ,
+                PRIMARY KEY `id` (`id`),
                 INDEX `pID` (`pID`),
 				FULLTEXT KEY `title` ( `title` ) ,
 				FULLTEXT KEY `content` ( `content` ) ,
-				FULLTEXT KEY `tags` ( `tags` ),
-				FULLTEXT KEY `suggestions` ( `suggestions` )
-				) ENGINE = InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_520_ci;";
-        $wpdb->query($sql);
+				FULLTEXT KEY `suggestions` ( `suggestions` ) ,
+				FULLTEXT KEY `custom_fields` ( `custom_fields` ) 
+				) ENGINE = InnoDB CHARSET=$default_charset COLLATE $default_collation;";
+        $created_posts = $wpdb->query($sql);
         $wpdb->show_errors($suppress);
     }
 
@@ -61,8 +80,8 @@ function linkate_posts_install()
 				`target_type` tinyint unsigned NOT NULL ,
 				`ankor_text` varchar(1000) NOT NULL ,
 				`external_url` varchar(1000) NOT NULL 
-				) ENGINE = InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_520_ci;";
-        $wpdb->query($sql);
+				) ENGINE = InnoDB CHARSET=$default_charset COLLATE $default_collation;";
+        $created_scheme = $wpdb->query($sql);
         $wpdb->show_errors($suppress);
     }
 
@@ -79,22 +98,26 @@ function linkate_posts_install()
 				`word` varchar(20) NOT NULL UNIQUE ,
 				`is_white` tinyint unsigned NOT NULL default 0,
 				`is_custom` tinyint unsigned NOT NULL default 0 
-				) ENGINE = InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_520_ci;";
-        $wpdb->query($sql);
+				) ENGINE = InnoDB CHARSET=$default_charset COLLATE $default_collation;";
+        $created_stop = $wpdb->query($sql);
         $wpdb->show_errors($suppress);
     }
 
     error_reporting($errorlevel);
 
     // (Re)fill options if empty
-    $options = (array) get_option('linkate-posts');
+    $options = (array) get_option('linkate-posts', []);
     fill_options($options);
 
     fill_stopwords();
 
     if ($create_index) { // only (re)create if needed
         $index_created = linkate_posts_save_index_entries(true);
+        $index_created ? cherry_write_log("Index was created") : cherry_write_log("Index creation failed");
     }
+
+    // tables creation result
+    return $created_posts && $created_scheme && $created_stop;
 }
 
 // Adding new column 'is_tag' in plugin ver. >= 1.2.0 
@@ -143,39 +166,48 @@ add_action("wp_ajax_update_collation", "linkate_table_update_collation_utf8mb4")
 function linkate_table_update_collation_utf8mb4()
 {
     global $wpdb;
+    $default_collation = "utf8mb4_unicode_520_ci";
+    $default_charset = "utf8mb4";
+    if (!$wpdb->has_cap('utf8mb4_520')) {
+        $default_collation = "utf8mb4_unicode_ci";
+        if (!$wpdb->has_cap('utf8mb4')) {
+            $default_collation = "utf8_unicode_ci";
+            $default_charset = "utf8";
+        }
+    }
     $table_posts = $wpdb->prefix . 'linkate_posts';
     $table_scheme = $wpdb->prefix . 'linkate_scheme';
     $table_stop = $wpdb->prefix . 'linkate_stopwords';
     $results = [];
     foreach ([$table_posts, $table_scheme, $table_stop] as $table) {
         $results[] = $wpdb->query(
-            "ALTER TABLE `$table` ENGINE = INNODB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_520_ci;"
+            "ALTER TABLE `$table` ENGINE = INNODB DEFAULT CHARSET=$default_charset COLLATE $default_collation;"
         );
         if ($table === $table_posts) {
             $results[] = $wpdb->query(
-                "ALTER TABLE `$table` CHANGE `content` `content` LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL;"
+                "ALTER TABLE `$table` CHANGE `content` `content` LONGTEXT CHARACTER SET $default_charset COLLATE $default_collation NOT NULL;"
             );
             $results[] = $wpdb->query(
-                "ALTER TABLE `$table` CHANGE `title` `title` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL;"
+                "ALTER TABLE `$table` CHANGE `title` `title` TEXT CHARACTER SET $default_charset COLLATE $default_collation NOT NULL;"
             );
             $results[] = $wpdb->query(
-                "ALTER TABLE `$table` CHANGE `tags` `tags` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL;"
+                "ALTER TABLE `$table` CHANGE `tags` `tags` TEXT CHARACTER SET $default_charset COLLATE $default_collation NOT NULL;"
             );
             $results[] = $wpdb->query(
-                "ALTER TABLE `$table` CHANGE `suggestions` `suggestions` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL;"
+                "ALTER TABLE `$table` CHANGE `suggestions` `suggestions` TEXT CHARACTER SET $default_charset COLLATE $default_collation NOT NULL;"
             );
         }
         if ($table === $table_scheme) {
             $results[] = $wpdb->query(
-                "ALTER TABLE `$table` CHANGE `ankor_text` `ankor_text` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL;"
+                "ALTER TABLE `$table` CHANGE `ankor_text` `ankor_text` VARCHAR(1000) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL;"
             );
         }
         if ($table === $table_stop) {
             $results[] = $wpdb->query(
-                "ALTER TABLE `$table` CHANGE `stemm` `stemm` VARCHAR(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL;"
+                "ALTER TABLE `$table` CHANGE `stemm` `stemm` VARCHAR(15) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL;"
             );
             $results[] = $wpdb->query(
-                "ALTER TABLE `$table` CHANGE `word` `word` VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL UNIQUE;"
+                "ALTER TABLE `$table` CHANGE `word` `word` VARCHAR(20) CHARACTER SET $default_charset COLLATE $default_collation NOT NULL UNIQUE;"
             );
         }
     }
@@ -207,7 +239,7 @@ function fill_options($options)
 {
     if ($options == NULL) {
         // saving license on options reset
-        $options = (array) get_option('linkate-posts');
+        $options = (array) get_option('linkate-posts', []);
         $hash_field = $options['hash_field'];
         $options = array();
         $options['hash_field'] = $hash_field;
@@ -281,11 +313,11 @@ function fill_options($options)
         $options['status']['future'] = 'false';
     }
     if (!isset($options['group_template'])) $options['group_template'] = '';
-    if (!isset($options['weight_content'])) $options['weight_content'] = 0.5;
-    if (!isset($options['weight_title'])) $options['weight_title'] = 0.5;
-    if (!isset($options['weight_tags'])) $options['weight_tags'] = 0.0;
-    if (!isset($options['num_terms'])) $options['num_terms'] = 50;
-    if (!isset($options['clean_suggestions_stoplist'])) $options['clean_suggestions_stoplist'] = 'false';
+    if (!isset($options['weight_content'])) $options['weight_content'] = 0.33;
+    if (!isset($options['weight_title'])) $options['weight_title'] = 0.33;
+    if (!isset($options['weight_custom'])) $options['weight_custom'] = 0.33;
+    if (!isset($options['num_terms'])) $options['num_terms'] = 150;
+    if (!isset($options['clean_suggestions_stoplist'])) $options['clean_suggestions_stoplist'] = 'true';
     $options['term_extraction'] = 'frequency'; // since 1.4 we hide TextRank option 
     if (!isset($options['utf8'])) $options['utf8'] = 'true';
     if (!function_exists('mb_internal_encoding')) $options['utf8'] = 'false';
@@ -309,7 +341,7 @@ function fill_options($options)
     if (!isset($options['anons_len'])) $options['anons_len'] = 200;
     if (!isset($options['suggestions_click'])) $options['suggestions_click'] = 'select';
     if (!isset($options['suggestions_join'])) $options['suggestions_join'] = 'all';
-    if (!isset($options['suggestions_donors_src'])) $options['suggestions_donors_src'] = 'title';
+    if (!isset($options['suggestions_donors_src'])) $options['suggestions_donors_src'] = 'title,content,custom_fields';
     if (!isset($options['suggestions_donors_join'])) $options['suggestions_donors_join'] = 'join';
     if (!isset($options['suggestions_switch_action'])) $options['suggestions_switch_action'] = 'false';
     if (!isset($options['ignore_relevance'])) $options['ignore_relevance'] = 'false'; // since 1.4.0
@@ -325,6 +357,7 @@ function fill_options($options)
     if (!isset($options['max_incoming_links'])) $options['max_incoming_links'] = 20;
     if (!isset($options['template_image_size'])) $options['template_image_size'] = '';
     if (!isset($options['show_cat_filter'])) $options['show_cat_filter'] = 'false';
+    if (!isset($options['index_custom_fields'])) $options['index_custom_fields'] = '';
     update_option('linkate-posts', $options);
     return $options;
 }
@@ -353,7 +386,7 @@ function fill_stopwords()
         }
 
         // Add custom stopwords from old versions to the db
-        $options = get_option("linkate-posts");
+        $options = get_option('linkate-posts', []);
         $custom_stopwords = isset($options["custom_stopwords"]) ? explode("\n", str_replace("\r", "", $options['custom_stopwords'])) : array();
         if (is_array($custom_stopwords) && !empty($custom_stopwords)) {
             $query = "INSERT INTO $table_name (stemm, word, is_white, is_custom) VALUES ";
@@ -384,7 +417,7 @@ if (!function_exists('link_cf_plugin_basename')) {
 
 function linkate_checkNeededOption()
 {
-    $options = get_option('linkate-posts');
+    $options = get_option('linkate-posts', []);
     $arr = getNeededOption();
     $final = false;
     $status = '';
@@ -437,7 +470,7 @@ function linkate_checkNeededOption()
 
 function getNeededOption()
 {
-    $options = get_option('linkate-posts');
+    $options = get_option('linkate-posts', []);
     $s = isset($options['hash_field']) ? $options['hash_field'] : '';
     if (empty($s)) {
         return NULL;
@@ -448,7 +481,7 @@ function getNeededOption()
 
 function linkate_callDelay()
 {
-    $options = get_option('linkate-posts');
+    $options = get_option('linkate-posts', []);
     if (!isset($options['hash_last_check']) || time() > $options['hash_last_check']) {
         return false;
     }
@@ -456,7 +489,7 @@ function linkate_callDelay()
 }
 function linkate_lastStatus()
 {
-    $options = get_option('linkate-posts');
+    $options = get_option('linkate-posts', []);
     return isset($options['hash_last_status']) ? $options['hash_last_status'] : false;
 }
 

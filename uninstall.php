@@ -8,7 +8,6 @@ if (defined('ABSPATH') && defined('WP_UNINSTALL_PLUGIN')) {
 
 	delete_option('linkate-posts');
 	delete_option('linkate_posts');
-	delete_option('linkate-posts-meta');
 	delete_option('linkate_posts_meta');
 
 	$table_name = $table_prefix . 'linkate_posts';

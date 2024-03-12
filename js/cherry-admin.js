@@ -12,7 +12,7 @@ jQuery(document).ready(function($){
 	var def_temp_before = "<a href=\"{url}\" title=\"{title}\">";
 	var def_temp_after = "</a>";
 
-	$("#restore_templates").click(function (e) {
+	$("#restore_templates").on("click", function (e) {
 		e.preventDefault();
 		$("#link_before").val(def_temp_before);
 		$("#link_after").val(def_temp_after);
@@ -36,7 +36,7 @@ jQuery(document).ready(function($){
 		$('#form_generate_csv').css('display', 'none');
 	}
 
-	$('input[type="checkbox"]').change(function () {
+	$('input[type="checkbox"]').on("change", function () {
 		$('#btn_csv_dload').remove();
 		$('#generate_csv').show();
 	})
@@ -64,21 +64,21 @@ jQuery(document).ready(function($){
         });
     }
 	
-    $.ajax({
-        type: "GET",
-        url: ajaxurl + "?action=check_collation",
-        datatype: 'json',
-        success: function (response) {
-            let result = JSON.parse(response);
-            console.log(result)
-            if (!result) {
-                $(".plugin-update-warning").html("<p>Рекоммендуется обновить таблицы плагина в БД для полной поддержки символов и эмодзи Unicode. Обновить сейчас?</p><p><button id='update_collation_btn' class='button button-secondary'>Обновить таблицы</button></p>");
-                $("#update_collation_btn").click(function (e) {
-                    update_collations();
-                })
-                $(".plugin-update-warning").show();
-            }
-        }
-    });
+    // $.ajax({
+    //     type: "GET",
+    //     url: ajaxurl + "?action=check_collation",
+    //     datatype: 'json',
+    //     success: function (response) {
+    //         let result = JSON.parse(response);
+    //         // console.log(result)
+    //         if (!result) {
+    //             $(".plugin-update-warning").html("<p>Рекоммендуется обновить таблицы плагина в БД для полной поддержки символов и эмодзи Unicode. Обновить сейчас?</p><p><button id='update_collation_btn' class='button button-secondary'>Обновить таблицы</button></p>");
+    //             $("#update_collation_btn").click(function (e) {
+    //                 update_collations();
+    //             })
+    //             $(".plugin-update-warning").show();
+    //         }
+    //     }
+    // });
 
 });

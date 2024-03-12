@@ -120,7 +120,7 @@ jQuery(document).ready(function ($) {
 
         table.setLocale('ru-ru');
 
-        $("#stopwords-add").click(function (event) {
+        $("#stopwords-add").on("click", function (event) {
             event.preventDefault();
             if ($("#custom_stopwords").val().trim().length === 0) {
                 alert("Поле пустое!")
@@ -142,7 +142,7 @@ jQuery(document).ready(function ($) {
                 });
             }
         })
-        $("#stopwords-defaults").click(function (event) {
+        $("#stopwords-defaults").on("click", function (event) {
             event.preventDefault();
             let conf = confirm("Это действие удалит все стоп-слова из таблицы и вернет стандартные. Хотите продолжить?");
             if (!conf)
@@ -161,7 +161,7 @@ jQuery(document).ready(function ($) {
                 }
             });
         })
-        $("#stopwords-remove-all").click(function (event) {
+        $("#stopwords-remove-all").on("click", function (event) {
             event.preventDefault();
             let conf = confirm("Вы точно хотите удалить все стоп слова?");
             if (!conf)

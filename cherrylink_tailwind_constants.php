@@ -19,4 +19,5 @@ class CL_TWC
 
     public static $INP_BASE = "block w-full text-sm text-stone-500 border rounded-lg";
     public static $CARD = "p-6 rounded-lg shadow-xl bg-white";
+    public static $CARD_SPECIAL = "p-6 rounded-lg shadow-xl bg-amber-200";
 }

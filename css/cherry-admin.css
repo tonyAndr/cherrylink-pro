@@ -232,38 +232,9 @@ progress {
     display: inline-block;
 }
 
-.cherry-adm-tooltip>img {
-    border: 1px solid #dcdcdc;
-    border-radius: 50%;
-    padding: 1px;
-}
-
-/* Tooltip text */
-.cherry-adm-tooltip .tooltiptext {
-    visibility: hidden;
-    width: 320px;
-    background-color: #444;
-    color: #fff;
-    text-align: center;
-    padding: 5px;
-    border-radius: 2px;
-
-    box-shadow: 0 0 5px 1px white;
-    /* Position the tooltip text - see examples below! */
-    position: absolute;
-    z-index: 1;
-
-    bottom: 0;
-    left: 155%;
-
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
 /* Show the tooltip text when you mouse over the tooltip container */
-.cherry-adm-tooltip:hover .tooltiptext {
-    visibility: visible;
-    opacity: 1;
+.cherry-adm-tooltip:hover {
+    cursor: pointer;
 }
 
 

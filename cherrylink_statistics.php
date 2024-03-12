@@ -189,9 +189,9 @@ function linkate_generate_csv_or_json_prettyfied($is_custom_column = false, $cus
         $ids_query = $table_prefix . "posts.ID IN (" . $custom_id . ") AND ";
     }
 
-    if (!isset($_POST['post_ids']) && !isset($gutenberg_data['post_ids']) && $custom_id === 0) {
-        return false;
-    }
+    // if (!isset($_POST['post_ids']) && !isset($gutenberg_data['post_ids']) && $custom_id === 0) {
+    //     return false;
+    // }
 
 
     if (isset($_POST['stats_offset'])) {

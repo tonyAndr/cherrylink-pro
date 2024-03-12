@@ -23,6 +23,7 @@ function cherrylink_pro_options_page()
 
     <div class="wrap">
         <div class="cherry-admin-logo">
+            <h1></h1>
             <div class="<?= CL_TWC::$H1 ?>">CherryLink Pro 🍒</div>
         </div>
 
@@ -31,7 +32,6 @@ function cherrylink_pro_options_page()
         $m->add_subpage('Основные', 'main', 'linkate_posts_main_options_subpage');
         $m->add_subpage('Сканирование сайта', 'scan', 'linkate_posts_index_options_subpage');
         $m->add_subpage('Для экспертов', 'pro', 'linkate_posts_expert_options_subpage');
-        // $m->add_subpage('Блок ссылок', 'output_block', 'linkate_posts_output_block_options_subpage');
         $m->add_subpage('Статистика', 'statistics', 'linkate_posts_statistics_options_subpage');
         $m->display();
         // add_action('in_admin_footer', 'linkate_posts_admin_footer');
@@ -42,7 +42,7 @@ function cherrylink_pro_options_page()
 
 function linkate_posts_license_field()
 {
-    $options = get_option('linkate-posts');
+    $options = get_option('linkate-posts', []);
     if (isset($_POST['update_license'])) {
         check_admin_referer('linkate-posts-update-options');
         // Fill up the options with the values chosen...
@@ -100,13 +100,11 @@ function linkate_posts_license_field()
 function linkate_posts_index_status_display($page = 'main')
 {
     global $wpdb, $table_prefix;
-    $options = get_option('linkate-posts');
-    $options_meta = get_option('linkate_posts_meta');
+    $options_meta = get_option('linkate_posts_meta', []);
     $table_index = $table_prefix . "linkate_posts";
     $table_scheme = $table_prefix . "linkate_scheme";
 
 
-    $options = get_option('linkate-posts');
     $index_rows = $wpdb->get_var("SELECT COUNT(*) FROM $table_index");
     if ($index_rows) {
         $index_status_text = " найдено $index_rows записей и страниц.";
@@ -118,7 +116,7 @@ function linkate_posts_index_status_display($page = 'main')
 
     $scheme_rows = $wpdb->get_var("SELECT COUNT(*) FROM $table_scheme");
     if ($scheme_rows) {
-        $scheme_status_text = " найдено $scheme_rows ссылок в записях и страницах (<a href=\"/wp-admin/options-general.php?page=cherrylink-pro&subpage=statistics\">поиск проблем</a>).";
+        $scheme_status_text = " найдено $scheme_rows ссылок в записях и страницах.";
         $scheme_status_class = "";
     } else {
         $scheme_status_text = " ссылки не найдены.";
@@ -153,12 +151,12 @@ function linkate_posts_index_status_display($page = 'main')
         <?php
         if ($page === 'main') {
         ?>
-            <button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2">Поиск проблем</button>
-            <button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2"><?= $index_process_status === 'DONE' ? "Сканировать сайт" :  "Пересканировать" ?></button>
+            <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=statistics"><button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2">Поиск проблем</button></a>
+            <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=scan"><button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2"><?= $index_process_status === 'DONE' ? "Сканировать сайт" :  "Пересканировать" ?></button></a>
         <?php
         } else {
         ?>
-            <form id="options_form" method="post" action="">
+            <form id="truncate_all_form" method="post" action="">
                 <button class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="truncate_all">Очистить базу ссылок</button>
             </form>
         <?php
@@ -191,7 +189,7 @@ function linkate_posts_index_progress()
 
 function linkate_posts_main_options_subpage()
 {
-    $options = get_option('linkate-posts');
+    $options = get_option('linkate-posts', []);
 
     // Create options file to export
     if (!isset($_POST['import_settings'])) {
@@ -221,14 +219,6 @@ function linkate_posts_main_options_subpage()
         } else {
             echo '<div class="notice-error notice"><p>' . __('<b>Не удалось импортировать...</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
         }
-    }
-
-    if (isset($_POST['reset_options'])) {
-        check_admin_referer('linkate-posts-update-options');
-        // Fill up the options with the values chosen...
-        fill_options(NULL);
-        // Show a message to say we've done something
-        echo '<div class="notice-success notice"><p>' . __('<b>Настройки сброшены.</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
     }
     //now we drop into html to display the option page form
 ?>
@@ -263,14 +253,7 @@ function linkate_posts_main_options_subpage()
                             <?php if (function_exists('wp_nonce_field')) wp_nonce_field('linkate-posts-update-options'); ?>
                         </form>
                     </div>
-                    <div class="mt-3 bg-slate-100 p-3 rounded-sm">
-                        <form method="post" action="">
-                            <h2 class="font-bold">Вернуть настройки по умолчанию</h2>
-                            <!-- <p><strong>Внимание! Все настройки будут сброшены, в том числе лицезионный ключ!</strong></p> -->
-                            <div class=""><input type="submit" class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="reset_options" value="<?php _e('Сбросить настройки', CHERRYLINK_TEXT_DOMAIN) ?>" /></div>
-                            <?php if (function_exists('wp_nonce_field')) wp_nonce_field('linkate-posts-update-options'); ?>
-                        </form>
-                    </div>
+
 
                 </div>
             </div>
@@ -296,7 +279,8 @@ function linkate_posts_main_options_subpage()
 
 function linkate_posts_expert_options_subpage()
 {
-    $options = get_option('linkate-posts');
+    global $wpdb, $table_prefix;
+    $options = get_option('linkate-posts', []);
     if (isset($_POST['update_options_filter']) || isset($_POST['update_options_output']) || isset($_POST['update_options_relevance'])) {
         check_admin_referer('linkate-posts-update-options');
         // Fill up the options with the values chosen...
@@ -339,21 +323,49 @@ function linkate_posts_expert_options_subpage()
             // 'match_all_against_title', 
             'weight_title',
             'weight_content',
-            'weight_tags',
+            'weight_custom',
             'ignore_relevance',
             'show_cat_filter'
         ));
 
         $wcontent = $options['weight_content'] + 0.0001;
         $wtitle = $options['weight_title'] + 0.0001;
-        $wtags = $options['weight_tags'] + 0.0001;
+        $wtags = $options['weight_custom'] + 0.0001;
         $wcombined = $wcontent + $wtitle + $wtags;
         $options['weight_content'] = $wcontent / $wcombined;
         $options['weight_title'] = $wtitle / $wcombined;
-        $options['weight_tags'] = $wtags / $wcombined;
+        $options['weight_custom'] = $wtags / $wcombined;
         update_option('linkate-posts', $options);
         // Show a message to say we've done something
         echo '<div class="notice-success notice"><p>' . __('<b>Настройки обновлены.</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
+    }
+
+    if (isset($_POST['recreate_db'])) {
+        delete_option('linkate_posts_meta');
+
+        $table_name = $table_prefix . 'linkate_posts';
+        $wpdb->query("DROP TABLE `$table_name`");
+
+        $table_name = $table_prefix . 'linkate_scheme';
+        $wpdb->query("DROP TABLE `$table_name`");
+
+        $table_name = $table_prefix . 'linkate_stopwords';
+        $wpdb->query("DROP TABLE `$table_name`");
+
+        $result = linkate_posts_install();
+        if ($result) {
+            echo '<div class="notice-success notice"><p>' . __('<b>Таблицы в БД были успешно пересозданы.</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
+        } else {
+            echo '<div class="notice-error notice"><p>' . __('<b>Операция пересоздания таблиц завершилась с ошибкой.</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
+        }
+    }
+
+    if (isset($_POST['reset_options'])) {
+        check_admin_referer('linkate-posts-update-options');
+        // Fill up the options with the values chosen...
+        fill_options(NULL);
+        // Show a message to say we've done something
+        echo '<div class="notice-success notice"><p>' . __('<b>Настройки сброшены.</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
     }
 
     ?>
@@ -473,25 +485,18 @@ function linkate_posts_expert_options_subpage()
                     </table><input type="submit" class="<?= CL_TWC::$BTN_SAVE ?> mt-6" name="update_options_relevance" value="<?php _e('Сохранить настройки', CHERRYLINK_TEXT_DOMAIN) ?>" />
                     <?php if (function_exists('wp_nonce_field')) wp_nonce_field('linkate-posts-update-options'); ?>
                 </div>
+
             </div>
         </form>
-    </div>
-<?php
-}
+        <div class="mt-4 <?= CL_TWC::$CARD_SPECIAL ?>">
+            <h2 id="recovery" class="<?= CL_TWC::$H2 ?>">Прочие настройки</h2>
+            <form method="post" action="">
+                <input type="submit" class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="recreate_db" value="<?php _e('Пересоздать базы данных', CHERRYLINK_TEXT_DOMAIN) ?>" />
 
-function linkate_posts_output_block_options_subpage()
-{
-
-    //now we drop into html to display the option page form
-?>
-    <div class="linkateposts-admin-flex">
-        <div class=" linkateposts-tab-content">
-            <?php if (is_plugin_active('cherrylink-related-block/cherrylink-related-block.php')) : ?>
-                <div style="border: 3px dashed tomato; padding: 10px; font-size:20px;text-align: center;line-height: 25px;">Плагины <code>CherryLink</code> и <code>CRB</code> объединились. Удалите дополнение <code>CherryLink Related Block</code>, чтобы не возникало конфликтов. Все настройки останутся на месте.</div>
-            <?php endif; ?>
-            <?php CL_RB_Admin_Area::output_admin_options(); ?>
+                <input type="submit" class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="reset_options" value="<?php _e('Вернуть настройки по умолчанию', CHERRYLINK_TEXT_DOMAIN) ?>" />
+                <?php if (function_exists('wp_nonce_field')) wp_nonce_field('linkate-posts-update-options'); ?>
+            </form>
         </div>
-
     </div>
 <?php
 }
@@ -499,8 +504,8 @@ function linkate_posts_output_block_options_subpage()
 function linkate_posts_index_options_subpage()
 {
     global $wpdb, $table_prefix;
-    $options = get_option('linkate-posts');
-    $options_meta = get_option('linkate_posts_meta');
+    $options = get_option('linkate-posts', []);
+    $options_meta = get_option('linkate_posts_meta', []);
     $table_index = $table_prefix . "linkate_posts";
     $table_scheme = $table_prefix . "linkate_scheme";
 
@@ -535,13 +540,15 @@ function linkate_posts_index_options_subpage()
         </div>
 
         <div class="<?= CL_TWC::$CARD ?> mt-6">
+
+            <!-- <h2 class="<?= CL_TWC::$H2 ?>">Настройка сканирования</h2> -->
+
             <input type="checkbox" id="spoiler_scan" />
             <label for="spoiler_scan" id="label_spoiler_scan" class="hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 hover:cursor-pointer">Настройка сканирования</label>
 
             <div class="spoiler_scan">
 
                 <form id="options_form" method="post" action="">
-                    <!-- <h2 class="<?= CL_TWC::$H2 ?>">Настройка сканирования</h2> -->
                     <p>При редактировании этих настроек обязательно нажмите кнопку "Начать сканирование", чтобы изменения вступили в силу.</p>
                     <hr>
                     <table class="optiontable form-table">
@@ -549,8 +556,9 @@ function linkate_posts_index_options_subpage()
                         // link_cf_display_num_term_length_limit($options['term_length_limit']);
                         link_cf_display_use_stemming($options['use_stemming']);
                         link_cf_display_seo_meta_source($options['seo_meta_source']);
-                        link_cf_display_suggestions_donors($options['suggestions_donors_src'], $options['suggestions_donors_join']);
-                        link_cf_display_clean_suggestions_stoplist($options['clean_suggestions_stoplist']);
+                        link_cf_display_index_custom_fields($options['index_custom_fields']);
+                        // link_cf_display_suggestions_donors($options['suggestions_donors_src'], $options['suggestions_donors_join']);
+                        // link_cf_display_clean_suggestions_stoplist($options['clean_suggestions_stoplist']);
                         ?>
                     </table>
                     <!-- <input type="submit" class="<?= CL_TWC::$BTN_DANGER ?>" name="truncate_all" value="<?php _e('Очистить все записи', CHERRYLINK_TEXT_DOMAIN) ?>" /> -->
@@ -564,7 +572,6 @@ function linkate_posts_index_options_subpage()
             <label for="spoiler_stop" id="label_spoiler_stop" class="hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 hover:cursor-pointer">Редактор стоп-слов</label>
 
             <div class="spoiler_stop">
-                <h2>Стоп-слова</h2>
                 <p>Список стоп-слов индивидуальный для вашего сайта. В плагин уже встроены самые распространенные слова из русского языка, которые не учитываются в поиске схожести. Если их требуется расширить - используйте поле справа от таблицы.</p>
                 <p>Слова нужно вводить без знаков препинания, каждое слово с новой строки. </p>
                 <p>Нет необходимости писать все возможные словоформы (пример: узнать, узнал, узнала, узнают, узнавать и тд.) - из слов выделяется основа без окончаний при добавлении в таблицу. </p>
@@ -615,8 +622,8 @@ function linkate_posts_index_options_subpage()
 function linkate_posts_statistics_options_subpage()
 {
     global $wpdb, $table_prefix;
-    $options = get_option('linkate-posts');
-    $options_meta = get_option('linkate_posts_meta');
+    $options = get_option('linkate-posts', []);
+    $options_meta = get_option('linkate_posts_meta', []);
     $table_index = $table_prefix . "linkate_posts";
     $table_scheme = $table_prefix . "linkate_scheme";
 
@@ -624,30 +631,35 @@ function linkate_posts_statistics_options_subpage()
 
     //php moved below for ajax
 ?>
-    <div class="linkateposts-admin-flex">
-        <div class=" linkateposts-tab-content">
-            <div class="cherry-db-status">
-                <h2>Поиск проблем с перелинковкой</h2>
-                <p>Нажмите на кнопку "Проверить перелинковку", чтобы найти записи, в которых:</p>
-                <ol>
-                    <li>Есть повторяющиеся ссылки;</li>
-                    <li>Нет входящих ссылок;</li>
-                    <li>Нет исходящих ссылок.</li>
-                </ol>
-                <p>Подробную статистику по перелинковке вы можете скачать в формате CSV с помощью инструмента Экспорт перелинковки на вкладке "Индекс ссылок".</p>
-                <?php //link_cf_prepare_tooltip(''); 
-                ?>
-            </div>
+    <div class=" linkateposts-tab-content pt-3">
+        <div class="<?= CL_TWC::$CARD ?>">
+            <h2 class="<?= CL_TWC::$H2 ?>">Поиск проблем с перелинковкой</h2>
+            <p>Нажмите на кнопку "Проверить перелинковку", чтобы найти записи, в которых:</p>
+            <ol class="list-inside list-decimal">
+                <li>Есть повторяющиеся ссылки;</li>
+                <li>Нет входящих ссылок;</li>
+                <li>Нет исходящих ссылок.</li>
+            </ol>
+            <p>Подробную статистику по перелинковке вы можете скачать в формате CSV с помощью инструмента Экспорт перелинковки на вкладке "Индекс ссылок".</p>
+            <?php //link_cf_prepare_tooltip(''); 
+            ?>
             <form id="form_generate_stats" method="post" action="">
                 <?php link_cf_display_scheme_statistics_options(); ?>
                 <progress id="csv_progress"></progress>
-                <div class="submit">
-                    <input id="generate_preview" type="submit" class="button button-cherry" name="generate_preview" value="<?php _e('Проверить перелинковку', CHERRYLINK_TEXT_DOMAIN) ?>" />
-                </div>
+                <input id="generate_preview" type="submit" class="<?= CL_TWC::$BTN_NORMAL ?>" name="generate_preview" value="<?php _e('Проверить перелинковку', CHERRYLINK_TEXT_DOMAIN) ?>" />
             </form>
             <br>
-            <div id="cherry_preview_stats_summary" data-linkscount="<?= $scheme_rows ?>"></div>
-            <div id="cherry_preview_stats_container" style="display:none">
+
+
+
+        </div>
+
+        <div id="cherry_preview_stats_container" style="display:none">
+            <div class="<?= CL_TWC::$CARD ?> mt-3">
+                <h2 class="<?= CL_TWC::$H2 ?>">
+                    Найдены проблемы с перелинковкой
+                </h2>
+                <div class="mb-3" id="cherry_preview_stats_summary" data-linkscount="<?= $scheme_rows ?>"></div>
                 <input type="checkbox" id="spoiler_has_repeats" />
                 <label for="spoiler_has_repeats" id="label_spoiler_has_repeats"></label>
                 <div class="spoiler_has_repeats">
@@ -673,10 +685,10 @@ function linkate_posts_statistics_options_subpage()
                 <div class="spoiler_has_recursion">
                 </div>
             </div>
-
-            <!--  We save and update index using ajax call, see function linkate_ajax_call_reindex below -->
         </div>
 
+        <!--  We save and update index using ajax call, see function linkate_ajax_call_reindex below -->
     </div>
+
 <?php
 }

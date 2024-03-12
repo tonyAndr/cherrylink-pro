@@ -7,7 +7,7 @@ jQuery(document).ready(function ($) {
     let stats_admin_preview = false, stats_object = {};
     let stats_offset = 0, stats_limit = 300, stats_posts_count = 0, in_progress = false;
 
-    $('#generate_csv').click(function (e) {
+    $('#generate_csv').on("click", function (e) {
         e.preventDefault();
         console.time('overall_time');
         $('#csv_progress').show();
@@ -17,7 +17,7 @@ jQuery(document).ready(function ($) {
         stats_get_posts_count();
     })
 
-    $('#generate_preview').click(function (e) {
+    $('#generate_preview').on("click", function (e) {
         e.preventDefault();
         console.time('overall_time');
         $('#csv_progress').show();
@@ -28,7 +28,7 @@ jQuery(document).ready(function ($) {
         stats_get_posts_count();
     })
 
-    $('#links_direction').change(function () {
+    $('#links_direction').on("change", function () {
         $("#links_direction_outgoing").toggle()
         $("#links_direction_incoming").toggle()
     })
@@ -130,7 +130,6 @@ jQuery(document).ready(function ($) {
                 console.log(response);
                 // $('#generate_csv').after('<a id="btn_csv_dload" class="button button-download" href="' + response['url'] + '" download>Скачать файл</a>');
                 location.href= response['url'];
-                // $('#btn_csv_dload').click();
             },
             error: function (jqXHR, textStatus, errorThrown ) {
                 handle_errors(errorThrown, jqXHR.responseText);
@@ -149,7 +148,7 @@ jQuery(document).ready(function ($) {
         let has_rec = posts_obj.has_recursion.length;
         let links_count = $("#cherry_preview_stats_summary").attr('data-linkscount');
         output += '<p>Было проверено <strong>' + stats_posts_count + '</strong> записей. Всего ссылок найдено: <strong>' + links_count + '</strong>.</p>';
-        output += '<ol>';
+        output += '<ol class="list-decimal list-inside">';
         output += '<li>Записи с повторами ссылок: <strong>' + (has_rep > 0 ? has_rep : 'Не обнаружены') + '</strong></li>';
         output += '<li>Записи без входящих ссылок: <strong>' + (no_inc > 0 ? no_inc : 'Не обнаружены') + '</strong></li>';
         output += '<li>Записи без исходящих ссылок: <strong>' + (no_out > 0 ? no_out : 'Не обнаружены') + '</strong></li>';
@@ -157,9 +156,10 @@ jQuery(document).ready(function ($) {
         output += '<li>Записи ссылающиеся на себя: <strong>' + (has_rec > 0 ? has_rec : 'Не обнаружены') + '</strong></li>';
         output += '</ol>';
         if (no_inc > 0 || no_out > 0 || has_rep > 0 || has_404 > 0 || has_rec > 0) {
-            output += '<p>Ниже представлен подробный отчет:</p>';
+        } else if (parseInt(links_count) === 0) {
+            output += '<p>Перелинковка не обнаружена.</p>';
         } else {
-            output += '<p>Похоже, что с вашей перелинковкой все в порядке :). </p>';
+            output += '<p>Проблем с текущей перелинковкой не найдено. </p>';
         }
         $("#cherry_preview_stats_summary").html(output);
     }
@@ -301,7 +301,7 @@ jQuery(document).ready(function ($) {
 
         $("#form_generate_stats").hide();
         $("#cherry_preview_stats_container").show();
-        $(open_spoiler_id).click();
+        $(open_spoiler_id).trigger("click");
     }
 
     function handle_errors (error_msg, error_details) {

@@ -8,11 +8,11 @@ jQuery(document).ready(function ($) {
     let index_offset = 0, index_limit = 20, index_posts_count = 0, index_in_progress = false, php_execution_time = 0;
     let ajax_index_error_occured = false;
 
-    $('.button-reindex').click(function (e) {
+    $('.button-reindex').on("click", function (e) {
         e.preventDefault();
+        index_serialized_form = $("#options_form").serialize();
         $('#reindex_progress').show();
         $('.button-reindex').hide();
-        index_serialized_form = $("#options_form").serialize();
         $("input").prop('disabled', true);
         $('#reindex_progress_text').html("Сканирование начинается...");
         index_get_posts_count();

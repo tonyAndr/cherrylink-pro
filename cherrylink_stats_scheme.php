@@ -29,8 +29,8 @@ class CL_Stats_Scheme
     //add_action('wp_ajax_linkate_create_links_scheme', 'linkate_create_links_scheme');
     public function linkate_create_links_scheme($offset = 0, $batch = 200)
     {
-        $options = get_option('linkate-posts');
-
+        $options = get_option('linkate-posts', []);
+        $table_posts = $this->wpdb->posts;
         $table_name_scheme = $this->table_prefix . 'linkate_scheme';
         // Truncate on first call
         if ($offset == 0) {
@@ -74,7 +74,7 @@ class CL_Stats_Scheme
         // }
 
         $posts = $this->wpdb->get_results("SELECT `ID`, `post_content`, `post_type` 
-									FROM $this->wpdb->posts 
+									FROM  $table_posts
 									WHERE `post_type` not in ('attachment', 'revision', 'nav_menu_item') 
 									LIMIT $offset, $batch", ARRAY_A);
         reset($posts);
@@ -98,7 +98,7 @@ class CL_Stats_Scheme
 
     public function linkate_scheme_update_option_timestamp()
     {
-        $options = get_option('linkate-posts');
+        $options = get_option('linkate-posts', []);
         $options['linkate_scheme_exists'] = true;
         $options['linkate_scheme_time'] = time();
 

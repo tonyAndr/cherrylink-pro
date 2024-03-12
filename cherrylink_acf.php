@@ -153,7 +153,7 @@ function link_cf_options_from_post($options, $args)
 
             case 'weight_title':
             case 'weight_content':
-            case 'weight_tags':
+            case 'weight_custom':
                 $options[$arg] = round((float) $_POST[$arg], 2);
                 break;
             case 'multilink':
@@ -182,6 +182,9 @@ function link_cf_options_from_post($options, $args)
                 //        	parse_str(base64_decode($_POST['export']),$options);
                 $options = $_POST['export'];
                 parse_str($_POST['export'], $options);
+                break;
+            case 'index_custom_fields':
+                $options['index_custom_fields'] = str_replace("\r", "", trim($_POST['index_custom_fields']));
                 break;
             default:
                 $options[$arg] = trim($_POST[$arg]);
@@ -235,7 +238,7 @@ function link_cf_display_multilink($multilink)
     <tr valign="top">
         <th scope="row"><label for="multilink"><?php _e('Разрешить множественную вставку ссылок:', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
         <td><input name="multilink" type="checkbox" id="multilink" value="cb_multilink" <?php echo $multilink; ?> /></td>
-        <td><?php link_cf_prepare_tooltip("Разрешить или запретить вставлять одну и ту же ссылку несколько раз. Если выключено - ссылки перечеркивются в панели перелинковки."); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_template_multilink"); ?></td>
     </tr>
 <?php
 }
@@ -281,7 +284,7 @@ function link_cf_display_relative_links($relative_links = "full")
                         } ?> value="no_domain">Без домена (/page.html)</option>
             </select>
         </td>
-        <td><?php link_cf_prepare_tooltip("Применяется к тегам {url} и {imagesrc}, т.е. для ссылок на статьи и изображения соответственно. Относительные ссылки не придется менять при переезде на HTTPS или новый домен."); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_template_relative_links"); ?></td>
     </tr>
 <?php
 }
@@ -292,7 +295,7 @@ function link_cf_display_limit_ajax($limit_ajax)
     <tr valign="top">
         <th scope="row"><label for="limit_ajax"><?php _e('Количество ссылок :', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
         <td><input name="limit_ajax" type="number" id="limit_ajax" style="width: 60px;" value="<?php echo $limit_ajax; ?>" size="2" /></td>
-        <td><?php link_cf_prepare_tooltip("Сколько ссылок будет выведено на панели перелинковки по умолчанию / сколько ссылок подгружать при нажатии на кнопку \"загрузить еще...\""); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_panel_limit_ajax"); ?></td>
     </tr>
 <?php
 }
@@ -486,7 +489,7 @@ function link_cf_display_show_catergory_filter($show_cat_filter = 'false')
 }
 function link_cf_display_quickfilter_dblclick($quickfilter_dblclick)
 {
-    ?>
+?>
     <tr valign="top">
         <th scope="row"><label for="quickfilter_dblclick"><?php _e('При выделении слова в редакторе вставлять его в поле быстрого фильтра автоматически <span style="color: red">(classic editor)</span>', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
         <td>
@@ -522,7 +525,7 @@ function link_cf_display_max_incoming_links($consider_max_incoming_links, $max_i
             <input name="max_incoming_links" type="number" min="1" id="max_incoming_links" value="<?php echo htmlspecialchars(stripslashes($max_incoming_links)); ?>" />
         </td>
         </td>
-        <td><?php link_cf_prepare_tooltip("Скрыть статьи, на которые уже указывает выбранное кол-во ссылок и больше."); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_panel_max_incoming_links"); ?></td>
     </tr>
 <?php
 }
@@ -612,7 +615,7 @@ function link_cf_display_anons_len($len)
     <tr valign="top">
         <th scope="row"><label for="anons_len"><?php _e('Длина анонса в символах (тег {anons}):', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
         <td><input name="anons_len" type="number" min="0" id="anons_len" value="<?php echo htmlspecialchars(stripslashes($len)); ?>" /></td>
-        <td><?php link_cf_prepare_tooltip("Тег анонса {anons} выводит вступительный текст к статье. Используется в шаблонах вставки ниже."); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_template_anons_len"); ?></td>
     </tr>
 <?php
 }
@@ -637,7 +640,7 @@ function link_cf_template_image_size($template_image_size)
                 ?>
             </select>
         </td>
-        <td><?php link_cf_prepare_tooltip("Выберите размер изображения из доступных вариантов для тега {imagesrc}."); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_template_image_size"); ?></td>
     </tr>
 <?php
 }
@@ -657,7 +660,7 @@ function link_cf_display_output_template($output_template)
                         } ?> value="seotitle">SEO Title</option>
             </select>
         </td>
-        <td><?php link_cf_prepare_tooltip("Влияет только на отображение ссылок в панели CherryLink в редакторе статьи. SEO title будет взят из Yoast/AIOSEO/RankMath ЕСЛИ соответствующий плагин выбран на вкладке _Индекс ссылок_. Если не найден - вернет заголовок Н1."); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_panel_output_template"); ?></td>
     </tr>
 <?php
 }
@@ -668,7 +671,7 @@ function link_cf_display_replace_template($link_before, $link_after, $link_temp_
     <tr valign="top">
         <th scope="row"><label for="link_before"><?php _e('Вывод ссылки перед выделенным текстом:', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
         <td><textarea name="link_before" id="link_before" rows="4" cols="38"><?php echo htmlspecialchars(stripslashes(urldecode(base64_decode($link_before)))); ?></textarea></td>
-        <td><?php link_cf_prepare_tooltip(link_cf_get_available_tags(false)); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_template_link_before_after"); ?></td>
     </tr>
     <tr valign="top">
         <th scope="row"><label for="link_after"><?php _e('Вывод после выделенного текста:', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
@@ -689,7 +692,7 @@ function link_cf_display_replace_term_template($term_before, $term_after, $term_
     <tr valign="top">
         <th scope="row"><label for="term_before"><?php _e('Вывод ссылки перед выделенным текстом:', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
         <td><textarea name="term_before" id="term_before" rows="4" cols="38"><?php echo htmlspecialchars(stripslashes(urldecode(base64_decode($term_before)))); ?></textarea></td>
-        <td><?php link_cf_prepare_tooltip(link_cf_get_available_tags(true)); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_template_term"); ?></td>
     </tr>
     <tr valign="top">
         <th scope="row"><label for="term_after"><?php _e('Вывод после выделенного текста:', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
@@ -737,7 +740,6 @@ function link_cf_display_scheme_export_options()
 {
     $hide_types = array('attachment', 'wp_block', 'revision', 'nav_menu_item', 'custom_css', 'oembed_cache', 'user_request', 'customize_changeset', 'sticky_ad', 'post_format', 'nav_menu', 'link_category', 'tablepress_table');
 ?>
-    <h2>Опции экспорта</h2>
     <div style="display: flex">
         <div>
             <p><strong>Типы записей и таксономий</strong></p>
@@ -799,6 +801,7 @@ function link_cf_display_scheme_export_options()
 function link_cf_display_scheme_statistics_options()
 {
     $hide_types = array('attachment', 'wp_block', 'revision', 'nav_menu_item', 'custom_css', 'oembed_cache', 'user_request', 'customize_changeset', 'post_format', 'nav_menu', 'link_category');
+    $show_types = array('post', 'page');
 ?>
     <h2>Опции поиска</h2>
     <div style="display: flex">
@@ -808,7 +811,7 @@ function link_cf_display_scheme_statistics_options()
             if ($types) {
                 echo "\n\t<table class=\"linkateposts-inner-table\"><tr valign=\"top\"><td colspan=\"2\"><strong>Типы публикаций</strong></td></tr>";
                 foreach ($types as $type) {
-                    if (false === in_array($type->name, $hide_types)) {
+                    if (false !== in_array($type->name, $show_types)) {
                         echo "\n\t<tr valign=\"top\"><td>$type->label</td><td><input type=\"checkbox\" name=\"export_types[]\" value=\"$type->name\" checked /></td></tr>";
                     }
                 }
@@ -843,7 +846,7 @@ function link_cf_display_scheme_statistics_options()
 }
 function link_cf_display_sidebar()
 {
-    $options = get_option('linkate-posts');
+    $options = get_option('linkate-posts', []);
     // $actLeft = '';
     if (
         isset($options['hash_last_status'])
@@ -1209,7 +1212,7 @@ function link_cf_display_num_terms($num_terms)
     <tr valign="top">
         <th scope="row"><label for="num_terms"><?php _e('Количество ключевых слов для определения схожести:', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
         <td><input name="num_terms" type="number" id="num_terms" style="width: 60px;" value="<?php echo $num_terms; ?>" size="3" /></td>
-        <td><?php link_cf_prepare_tooltip("Количество самых часто встречающихся в тексте слов, которые использует алгоритм для сравнения с другими статьями. <br><br>Если алгоритм не нашел статью, которую вы считаете релевантной, то можете попробовать увеличить это число (больше 200 не рекомендую, может влиять на производительность).<br><br>Подробнее читайте в мануале (ссылка справа)."); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_relevancy_num_terms"); ?></td>
     </tr>
 <?php
 }
@@ -1222,11 +1225,11 @@ function link_cf_display_weights($options)
         <td>
             <label for="weight_content">содержание записи: </label><input name="weight_content" type="number" style="width: 60px;" id="weight_content" value="<?php echo round(100 * $options['weight_content']); ?>" size="3" /> %
             <br><br>
-            <label for="weight_title">заголовок статьи: </label><input name="weight_title" type="number" style="width: 60px;" id="weight_title" value="<?php echo round(100 * $options['weight_title']); ?>" size="3" /> %
+            <label for="weight_title">заголовок записи: </label><input name="weight_title" type="number" style="width: 60px;" id="weight_title" value="<?php echo round(100 * $options['weight_title']); ?>" size="3" /> %
             <br><br>
-            <label for="weight_tags">метки (теги): </label><input name="weight_tags" type="number" style="width: 60px;" id="weight_tags" value="<?php echo round(100 * $options['weight_tags']); ?>" size="3" /> %
+            <label for="weight_custom">произвольные поля: </label><input name="weight_custom" type="number" style="width: 60px;" id="weight_custom" value="<?php echo round(100 * $options['weight_custom']); ?>" size="3" /> %
         </td>
-        <td><?php link_cf_prepare_tooltip("Укажите в процентах, какое поле для вас важнее при поиске схожих записей. Сумма не может превышать 100%."); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_relevancy_weights"); ?></td>
     </tr>
 <?php
 }
@@ -1238,7 +1241,7 @@ function link_cf_display_stopwords()
     <br><br>
     <input name="is_white" type="checkbox" id="is_white" value="is_white" /><label for="is_white"><?php _e('Добавить в белый список', CHERRYLINK_TEXT_DOMAIN) ?></label>
     <br><br>
-    <? link_cf_prepare_tooltip("Поставьте эту галочку, чтобы добавить слова в белый список. Они не будут удалены из текста при реиндексации. Полезно, если вы не хотите учитывать короткие слова, но нужно сохранить какие-либо сокращения в тексте (ИП, НИИ, ОАО и пр)."); ?>
+    <? link_cf_prepare_tooltip("scan_stopwords_white"); ?>
 <?php
 }
 
@@ -1277,7 +1280,7 @@ function link_cf_display_ignore_relevance($ignore_relevance)
                         } ?> value="true">Да</option>
             </select>
         </td>
-        <td><?php link_cf_prepare_tooltip("Если включено (опция \"Да\"), то настройки ниже не имеют силы, а в панели перелинковки будут выведены все публикации"); ?></td>
+        <td><?php link_cf_prepare_tooltip("expert_relevancy_ignore"); ?></td>
     </tr>
 <?php
 }
@@ -1314,8 +1317,22 @@ function link_cf_display_use_stemming($use_stemming)
                             echo 'selected="selected"';
                         } ?> value="true">Да</option>
             </select>
-        <td><?php link_cf_prepare_tooltip("Более тщательная обработка текстов при создании индекса. Улучшает точность алгоритмов релевантности, но увеличивает время создания индекса.<br><br>Если стемминг выключен, то стоп-слова тоже не имеют силы, из-за невозможности точного сравнения слов. "); ?></td>
+        <td><?php link_cf_prepare_tooltip("scan_use_stemming"); ?></td>
         </td>
+    </tr>
+<?php
+}
+
+function link_cf_display_index_custom_fields($index_custom_fields)
+{
+?>
+    <tr valign="top">
+        <th scope="row"><label for="index_custom_fields"><?php _e('Сканировать текст из произвольных полей', CHERRYLINK_TEXT_DOMAIN) ?></label></th>
+        <td>
+            <textarea name="index_custom_fields" id="index_custom_fields" rows="4" cols="38" placeholder="my_custom_keywords&#10;acf_field1&#10;..."><?php echo $index_custom_fields; ?></textarea>
+            <p>Ввeдите названия полей каждое с новой строки</p>
+        </td>
+        <td><?php link_cf_prepare_tooltip("scan_index_custom_fields"); ?></td>
     </tr>
 <?php
 }
@@ -1341,16 +1358,15 @@ function link_cf_display_seo_meta_source($seo_meta_source = "none")
                         } ?> value="rankmath">RankMath</option>
             </select>
         </td>
-        <td><?php link_cf_prepare_tooltip("Выберите плагин, который вы используете для поисковой оптимизации статей. Мета-поля title и description могут быть использованы для улучшения точности алгоритма и увеличения количества подсказок анкоров."); ?></td>
+        <td><?php link_cf_prepare_tooltip("scan_seo_meta_source"); ?></td>
     </tr>
 <?php
 }
 
-function link_cf_prepare_tooltip($text)
+function link_cf_prepare_tooltip($anchor)
 {
 ?>
-    <div class='cherry-adm-tooltip'><img src='<?php echo CHERRYLINK_DIR_URL ; ?>img/information-button.png'>
-        <div class='tooltiptext'><?php echo $text; ?></div>
+    <div class='cherry-adm-tooltip'><a target="_blank" href="https://seocherry.ru/?page_id=1699#<?= $anchor; ?>" title="Перейти к справке"><img src='<?php echo CHERRYLINK_DIR_URL; ?>img/question-mark.png'></a>
     </div>
 <?php
 }

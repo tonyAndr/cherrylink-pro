@@ -62,7 +62,7 @@ function linkate_otf_title_seo($option_key, $result, $ext)
 
 function linkate_otf_url($option_key, $result, $ext)
 {
-    $options = get_option('linkate-posts');
+    $options = get_option('linkate-posts', []);
     $url_option = $options['relative_links'];
     $value = get_permalink($result->ID);
     $value = linkate_unparse_url($value, $url_option);
@@ -186,12 +186,13 @@ function linkate_otf_imagesrc($option_key, $result, $ext)
 {
     $options = get_option($option_key);
     $url_option = $options['relative_links'];
-    $crb_image_size = $options['crb_image_size'];
+    // $crb_image_size = $options['crb_image_size'];
     $template_image_size = isset($options['template_image_size']) ? $options['template_image_size'] : '';
-    $crb_placeholder_path = empty($options['crb_placeholder_path']) ? CHERRYLINK_DIR_URL . '/img/imgsrc_placeholder.jpg' : $options['crb_placeholder_path'];
-    $crb_content_filter = $options['crb_content_filter'] == 1;
+    $crb_placeholder_path = CHERRYLINK_DIR_URL . 'img/imgsrc_placeholder.jpg';
+    // $crb_content_filter = $options['crb_content_filter'] == 1;
 
-    $size_to_use = ($ext && $ext === 'crb') ? $crb_image_size : $template_image_size;
+    // $size_to_use = ($ext && $ext === 'crb') ? $crb_image_size : $template_image_size;
+    $size_to_use = $template_image_size;
 
     // Check Featured Image first
     $imgsrc = get_the_post_thumbnail_url($result->ID, $size_to_use ? $size_to_use : '');
@@ -205,10 +206,10 @@ function linkate_otf_imagesrc($option_key, $result, $ext)
 
     // DANGEROUS but possibly can find more images
     $content = $result->post_content;
-    if ($crb_content_filter) {
-        $content = str_replace("[crb_show_block]", "", $content); // preventing nesting overflow
-        $content = apply_filters('the_content', $content);
-    }
+    // if ($crb_content_filter) {
+    //     $content = str_replace("[crb_show_block]", "", $content); // preventing nesting overflow
+    //     $content = apply_filters('the_content', $content);
+    // }
 
     // Try to extract img tags from html
     $pattern = '/<img.+?src\s*=\s*[\'|\"](.*?)[\'|\"].+?>/i';
@@ -257,12 +258,12 @@ function linkate_otf_imagesrc($option_key, $result, $ext)
 function linkate_otf_imgtag($option_key, $result, $ext)
 {
     $options = get_option($option_key);
-    $crb_image_size = $options['crb_image_size'];
+    // $crb_image_size = $options['crb_image_size'];
     $template_image_size = isset($options['template_image_size']) ? $options['template_image_size'] : '';
-    $crb_placeholder_path = empty($options['crb_placeholder_path']) ? CHERRYLINK_DIR_URL . '/img/imgsrc_placeholder.jpg' : $options['crb_placeholder_path'];
-    $crb_content_filter = $options['crb_content_filter'] == 1;
+    $crb_placeholder_path = CHERRYLINK_DIR_URL . 'img/imgsrc_placeholder.jpg';
+    // $crb_content_filter = $options['crb_content_filter'] == 1;
 
-    $size_to_use = ($ext && $ext === 'crb') ? $crb_image_size : $template_image_size;
+    $size_to_use = $template_image_size;
 
     // Check Featured Image first
     $imgtag = get_the_post_thumbnail(intval($result->ID), $size_to_use ? $size_to_use : '');
@@ -275,10 +276,10 @@ function linkate_otf_imgtag($option_key, $result, $ext)
     $alt = linkate_otf_title($option_key, $result, $ext);
     // DANGEROUS but possibly can find more images
     $content = $result->post_content;
-    if ($crb_content_filter) {
-        $content = str_replace("[crb_show_block]", "", $content); // preventing nesting overflow
-        $content = apply_filters('the_content', $content);
-    }
+    // if ($crb_content_filter) {
+    //     $content = str_replace("[crb_show_block]", "", $content); // preventing nesting overflow
+    //     $content = apply_filters('the_content', $content);
+    // }
 
     // Try to extract img tags from html
     $pattern = '/<img.+?src\s*=\s*[\'|\"](.*?)[\'|\"].+?>/i';
