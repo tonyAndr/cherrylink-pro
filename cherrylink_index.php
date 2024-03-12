@@ -107,10 +107,11 @@ function linkate_posts_save_index_entries($is_initial = false)
     // Reindex terms on first call ONLY
     //!!! linkate_reindex_terms($wpdb, $table_name, $options, $reindex_offset, $linkate_overusedwords, $index_helpers);
 
+    $allowed_types = $index_helpers->get_allowed_types_sql();
     // POSTS
     $posts = $wpdb->get_results("SELECT `ID`, `post_title`, `post_content`, `post_type` 
 									FROM $wpdb->posts 
-									WHERE `post_type` not in ('attachment', 'revision', 'nav_menu_item', 'wp_block') 
+									WHERE `post_type` in ($allowed_types) 
 									LIMIT $reindex_offset, $batch", OBJECT);
     reset($posts);
 

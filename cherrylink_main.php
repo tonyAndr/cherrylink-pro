@@ -3,7 +3,7 @@
 Plugin Name: CherryLink Pro
 Plugin URI: http://seocherry.ru/
 Description: Плагин для упрощения ручной внутренней перелинковки. Поиск релевантных ссылок, ускорение монотонных действий, гибкие настройки, удобная статистика и экспорт.
-Version: 0.9.0
+Version: 0.9.1
 Author: Anton SeoCherry.ru
 Author URI: http://seocherry.ru/
 Text Domain: cherrylink-td
@@ -384,7 +384,8 @@ class LinkatePosts
             $options['first_install'] = current_time('timestamp');
             update_option('linkate_posts_meta', $options);
 
-            $amount_of_db_rows = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` not in ('attachment', 'revision', 'nav_menu_item', 'wp_block')");
+            $index_helper = new CL_Index_Helpers(null, $options, $wpdb);
+            $amount_of_db_rows = $index_helper->get_indexable_posts_count();
             if ($amount_of_db_rows > CHERRYLINK_INITIAL_LIMIT)
                 set_transient('cherry-manual-indexation-needed', true, 20);
         }
@@ -512,7 +513,8 @@ function linkate_posts_init()
 
     $cl_index_helper = new CL_Index_Helpers(null, null, $wpdb);
     //install the actions to keep the index up to date
-    add_action('save_post', 'linkate_sp_save_index_entry', 1, 3);
+    // add_action('rest_after_insert_post', 'linkate_sp_save_index_entry', 1000000000, 3);
+    add_action('wp_insert_post', 'linkate_sp_save_index_entry', 100000, 3);
     add_action('delete_post', array($cl_index_helper, 'linkate_sp_delete_index_entry'), 1);
 
     // add_action('create_term', 'linkate_sp_save_index_entry_term', 1, 3);
@@ -530,23 +532,22 @@ function linkate_posts_init()
 
 function linkate_check_update()
 {
+
     require 'updater/plugin-update-checker.php';
 
     $update_checker = Puc_v4_Factory::buildUpdateChecker(
-        'https://github.com/tonyAndr/cherrylink',
+        'https://github.com/tonyAndr/cherrylink-pro',
         __FILE__,
-        'cherrylink'
+        'cherrylink-pro'
     );
 
-    // legacy: 6d568422fc0119bba8ac68799afb87572e0f571e
-    $update_checker->setAuthentication('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');
-
-    $update_checker->setBranch('master');
+    $update_checker->setBranch('main');
 }
 
-linkate_check_update();
+// linkate_check_update();
 add_action('init', 'linkate_posts_init', 1);
 register_activation_hook(__FILE__, array('LinkatePosts', 'lp_activate'));
+add_action('plugins_loaded', 'linkate_check_update');
 
 
 function cherry_write_log($data)

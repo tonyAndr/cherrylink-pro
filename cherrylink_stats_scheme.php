@@ -73,9 +73,11 @@ class CL_Stats_Scheme
         //     $this->wpdb->flush();
         // }
 
+        $index_helpers = new CL_Index_Helpers(null, null, $this->wpdb);
+        $allowed_types = $index_helpers->get_allowed_types_sql();
         $posts = $this->wpdb->get_results("SELECT `ID`, `post_content`, `post_type` 
 									FROM  $table_posts
-									WHERE `post_type` not in ('attachment', 'revision', 'nav_menu_item') 
+									WHERE `post_type` in ($allowed_types) 
 									LIMIT $offset, $batch", ARRAY_A);
         reset($posts);
 

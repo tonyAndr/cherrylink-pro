@@ -739,13 +739,17 @@ function link_cf_display_included_posts($included_posts)
 function link_cf_display_scheme_export_options()
 {
     $hide_types = array('attachment', 'wp_block', 'revision', 'nav_menu_item', 'custom_css', 'oembed_cache', 'user_request', 'customize_changeset', 'sticky_ad', 'post_format', 'nav_menu', 'link_category', 'tablepress_table');
+
+    $args = array(
+        'public'   => true,
+    );
 ?>
     <div style="display: flex">
         <div>
             <p><strong>Типы записей и таксономий</strong></p>
             <table class="linkateposts-inner-table">
                 <?php
-                $types = get_post_types('', 'object');
+                $types = get_post_types($args, 'object');
                 if ($types) {
                     echo "\n\t<tr valign=\"top\"><td colspan=\"2\"><strong>Типы публикаций</strong></td></tr>";
                     foreach ($types as $type) {

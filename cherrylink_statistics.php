@@ -169,13 +169,15 @@ function linkate_generate_csv_or_json_prettyfied($is_custom_column = false, $cus
 {
     // get rows from db
     global $wpdb, $table_prefix;
+    $index_helpers = new CL_Index_Helpers(null, null, $wpdb);
+    $allowed_types = $index_helpers->get_allowed_types_sql();
     $gutenberg_data = json_decode(file_get_contents('php://input'), true);
     $admin_preview_stats = false;
     $from_editor = false;
     $ids_query = "";
     $bounds = "";
     $post_status = "";
-    $types = $table_prefix . "posts.post_type NOT IN ('attachment', 'nav_menu_item', 'revision', 'wp_block')";
+    $types = $table_prefix . "posts.post_type IN ($allowed_types)";
 
     if (isset($_POST['admin_preview_stats'])) $admin_preview_stats = true;
 
@@ -277,9 +279,11 @@ function linkate_generate_csv_or_json_prettyfied_backwards()
 {
     // get rows from db
     global $wpdb, $table_prefix;
+    $index_helpers = new CL_Index_Helpers(null, null, $wpdb);
+    $allowed_types = $index_helpers->get_allowed_types_sql();
     $ids_query = ""; // keep it for now, only useful for forward-way stats
     $bounds = "";
-    $types = $table_prefix . "posts.post_type NOT IN ('attachment', 'nav_menu_item', 'revision', 'wp_block')";
+    $types = $table_prefix . "posts.post_type IN ($allowed_types)";
 
     if (isset($_POST['stats_offset'])) {
         $bounds = " LIMIT " .  $_POST['stats_offset'] . "," . $_POST['stats_limit'];

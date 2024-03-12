@@ -13,6 +13,7 @@ class CL_Index_Helpers
     public $options;
     public $wpdb;
     public $table_prefix;
+    public $allowed_post_types;
 
     public function __construct($stemmer, $options, $wpdb)
     {
@@ -21,6 +22,17 @@ class CL_Index_Helpers
         $this->wpdb = $wpdb;
 
         $this->table_prefix = $wpdb->prefix;
+
+        $args = array(
+            'public'   => true,
+            '_builtin' => false
+        );
+        $types = get_post_types($args, 'objects');
+        $this->allowed_post_types = ['post', 'page'];
+        // add custom types
+        foreach ($types as $type) {
+            $this->allowed_post_types[] = $type->name;
+        }
     }
 
     public function prepare_stopwords()
@@ -270,7 +282,14 @@ class CL_Index_Helpers
     public function get_indexable_posts_count()
     {
         $table = $this->wpdb->posts;
-        return $this->wpdb->get_var("SELECT COUNT(*) FROM $table WHERE `post_type` not in ('attachment', 'revision', 'nav_menu_item', 'wp_block')");
+        $allowed_types = $this->get_allowed_types_sql();
+        return $this->wpdb->get_var("SELECT COUNT(*) FROM $table WHERE `post_type` in ($allowed_types)");
+    }
+
+    public function get_allowed_types_sql() {
+        return implode(', ', array_map(function ($type) {
+            return "'".$type."'";
+        }, $this->allowed_post_types));
     }
 
     public function collect_custom_fields($post, $stopwords)

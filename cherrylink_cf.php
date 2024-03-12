@@ -653,22 +653,24 @@ function linkate_get_post_seo_title($post, $seo_meta_source = 'none')
     $seotitle = '';
     switch ($seo_meta_source) {
         case 'yoast':
-            if (function_exists('wpseo_init')) {
-                $seotitle = linkate_decode_yoast_variables($post->ID);
-                // TODO: YoastSEO()->meta->for_current_page()->title;
+            if (function_exists('YoastSEO')) {
+                $seotitle = linkate_decode_yoast_variables($post->ID); // weird but works
+                // YoastSEO()->meta->for_current_page()->title; https://developer.yoast.com/customization/apis/surfaces-api/
+                // !! this returns old data $seotitle = YoastSEO()->meta->for_post( $post->ID )->title;
             }
             break;
         case 'aioseo':
             //All in One SEO Pack 4.0 Before
             if (!empty(get_post_meta($post->ID, '_aioseop_title', true))) {
                 $seotitle = get_post_meta($post->ID, '_aioseop_title', true);
+                break;
             }
             //All in One SEO 4.0 After
             if (function_exists('aioseo')) {
-                $seotitle = aioseo()->meta->metaData->getMetaData($post)->title;
-                if (!empty($seotitle)) {
+                // $seotitle = aioseo()->meta->metaData->getMetaData($post)->title;
+                // if (!empty($seotitle)) {
                     $seotitle = aioseo()->meta->title->getPostTitle($post->ID);
-                }
+                // }
             }
             break;
         case 'rankmath':
