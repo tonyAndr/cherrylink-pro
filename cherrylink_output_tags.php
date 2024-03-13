@@ -145,9 +145,8 @@ function linkate_otf_anons($option_key, $result, $ext)
     return $excerpt;
 }
 
-function linkate_otf_suggestions($option_key, $result, $ext)
-{
-    return $result->suggestions;
+function linkate_otf_suggestions($option_key, $result, $ext) {
+    return trim($result->suggestions);
 }
 
 function linkate_otf_catnames($option_key, $result, $ext)

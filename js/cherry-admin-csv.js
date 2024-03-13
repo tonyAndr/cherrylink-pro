@@ -6,25 +6,35 @@ jQuery(document).ready(function ($) {
     let stats_interval_check, stats_serialized_form;
     let stats_admin_preview = false, stats_object = {};
     let stats_offset = 0, stats_limit = 300, stats_posts_count = 0, in_progress = false;
+    let process_type = 'csv'; // csv or preview
 
     $('#generate_csv').on("click", function (e) {
         e.preventDefault();
         console.time('overall_time');
         $('#csv_progress').show();
         $('#generate_csv').hide();
+        stats_admin_preview = false;
+        stats_offset = 0
+        stats_posts_count = 0
+        stats_object = {}
         stats_serialized_form = $("#form_generate_csv").serialize();
         $("input").prop('disabled', true);
+        process_type = 'csv'
         stats_get_posts_count();
     })
 
     $('#generate_preview').on("click", function (e) {
         e.preventDefault();
         console.time('overall_time');
-        $('#csv_progress').show();
+        $('#link_check_progress').show();
         $('#generate_preview').hide();
         stats_admin_preview = true;
+        stats_offset = 0
+        stats_posts_count = 0
+        stats_object = {}
         stats_serialized_form = $("#form_generate_stats").serialize() + "&admin_preview_stats=true";
         $("input").prop('disabled', true);
+        process_type = 'preview'
         stats_get_posts_count();
     })
 
@@ -62,6 +72,7 @@ jQuery(document).ready(function ($) {
             clearInterval(stats_interval_check);
 
             $('#csv_progress').hide();
+            $('#link_check_progress').hide();
             $("input").prop('disabled', false);
             console.log("Stats created successfully")
             if (!stats_admin_preview) {
@@ -112,8 +123,15 @@ jQuery(document).ready(function ($) {
     function stats_update_progress() {
         let current = 0;
         current = Math.round(stats_offset / stats_posts_count * 100)
-        $('#csv_progress').prop('max', 100);
-        $('#csv_progress').val(current);
+        if (process_type === 'preview') {
+
+            $('#link_check_progress').prop('max', 100);
+            $('#link_check_progress').val(current);
+        } else {
+            $('#csv_progress').prop('max', 100);
+            $('#csv_progress').val(current);
+            
+        }
     }
 
     // Create results file
@@ -307,8 +325,12 @@ jQuery(document).ready(function ($) {
     function handle_errors (error_msg, error_details) {
         console.log(error_msg);
         $('#csv_progress').hide();
+        $('#link_check_progress').hide();
         $("input").prop('disabled', false);
-
-        $('#csv_progress').parent().append("<p>Что-то пошло не так, возникла ошибка при обработке запроса: <strong>" + error_msg +"</strong>.</p>" + error_details);
+        if (process_type === 'preview') {
+            $('#link_check_progress').parent().append("<p>Что-то пошло не так, возникла ошибка при обработке запроса: <strong>" + error_msg +"</strong>.</p>" + error_details);
+        } else {
+            $('#csv_progress').parent().append("<p>Что-то пошло не так, возникла ошибка при обработке запроса: <strong>" + error_msg +"</strong>.</p>" + error_details);
+        }
     }
 });

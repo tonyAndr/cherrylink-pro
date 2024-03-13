@@ -76,20 +76,6 @@ function linkate_panel_tinymce_js()
     wp_localize_script('cherrylink-js-main', 'ajax_obj', ['ajaxurl' => admin_url('admin-ajax.php')]);
     wp_enqueue_script('cherrylink-js-main');
 }
-
-// function linkate_panel_gutenberg_js()
-// {
-//     $js_path = '';
-//     if (($_SERVER['HTTP_HOST']) === 'seoplugs') {
-//         //DEBUG ONLY 
-//         $js_path = plugins_url( 'gutenberg-src/build/cherry-gutenberg.js', __FILE__ );
-//     } else {
-//         //RELEASE
-//         $js_path = plugins_url( 'js/cherry-gutenberg.js', __FILE__ );
-//     }
-//     wp_register_script('cherrylink-js-main', $js_path, array('jquery', 'wp-blocks', 'wp-editor', 'wp-dom-ready', 'wp-plugins', 'wp-edit-post', 'wp-element'), LinkatePosts::get_linkate_version());
-//     wp_enqueue_script('cherrylink-js-main');
-// }
 function linkate_snowball_js()
 {
     wp_register_script('snowball-script', plugins_url('/js/Snowball.min.js', __FILE__));

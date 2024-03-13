@@ -52,7 +52,7 @@ function register_cherrylink_gutenberg_scripts() {
     $js_path = '';
     if (($_SERVER['HTTP_HOST']) === 'seoplugs') {
         //DEBUG ONLY 
-        $js_path = plugins_url( './gutenberg-src/build/cherry-gutenberg.js', __FILE__ );
+        $js_path = plugins_url( '../gutenberg-src/build/cherry-gutenberg.js', __FILE__ );
     } else {
         //RELEASE
         $js_path = plugins_url( 'js/cherry-gutenberg.js', __FILE__ );

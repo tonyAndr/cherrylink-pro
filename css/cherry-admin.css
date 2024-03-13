@@ -193,7 +193,7 @@ input.reset {
 #reindex_progress {
     display: none;
 }
-
+#link_check_progress,
 #csv_progress {
     display: none;
 }

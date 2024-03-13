@@ -154,13 +154,7 @@ function linkate_posts_index_status_display($page = 'main')
             <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=statistics"><button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2">Поиск проблем</button></a>
             <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=scan"><button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2"><?= $index_process_status === 'DONE' ? "Сканировать сайт" :  "Пересканировать" ?></button></a>
         <?php
-        } else {
-        ?>
-            <form id="truncate_all_form" method="post" action="">
-                <button class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="truncate_all">Очистить базу ссылок</button>
-            </form>
-        <?php
-        }
+        } 
 
         //link_cf_prepare_tooltip('                <p>Справа от заголовка "Статус индексирования" есть шильдик с одним из вариантов:</p><ul><li>[Индекс не создан]</li>                <li>[Создание индекса не закончено]</li><li>[Индекс создан]</li></ul>                <p>Текст "Создание индекса не закончено" обычно означает, что индексация не завершилась корректно.                 Рекомендуется пересоздать индекс. Эта же надпись появится, если вы создаете индекс прямо сейчас, например, в другой вкладке браузера.</p>                <p>Текст "Индекс не создан" говорит сам за себя. Необходимо его создать кнопкой "Пересоздать индекс".</p>                <p>Если [Индекс создан], или шильдика с надписью нет вообще, то никаких действий не требуется.</p>'); 
         ?>
@@ -341,6 +335,7 @@ function linkate_posts_expert_options_subpage()
     }
 
     if (isset($_POST['recreate_db'])) {
+        check_admin_referer('linkate-posts-update-options');
         delete_option('linkate_posts_meta');
 
         $table_name = $table_prefix . 'linkate_posts';
@@ -366,6 +361,27 @@ function linkate_posts_expert_options_subpage()
         fill_options(NULL);
         // Show a message to say we've done something
         echo '<div class="notice-success notice"><p>' . __('<b>Настройки сброшены.</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
+    }
+
+
+    if (isset($_POST['truncate_all'])) {
+        $options_meta = get_option('linkate_posts_meta', []);
+        $table_index = $table_prefix . "linkate_posts";
+        $table_scheme = $table_prefix . "linkate_scheme";
+        check_admin_referer('linkate-posts-update-options');
+        // Remove scheme
+        unset($options['linkate_scheme_exists']);
+        unset($options['linkate_scheme_time']);
+        update_option('linkate-posts', $options);
+
+        unset($options_meta['indexing_process']);
+        update_option('linkate_posts_meta', $options_meta);
+        $wpdb->query("TRUNCATE `$table_scheme`");
+        // Remove index
+        $wpdb->query("TRUNCATE `$table_index`");
+
+        // Show a message to say we've done something
+        echo '<div class="notice-success notice"><p>' . __('<b>Базы данных плагина очищены.</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
     }
 
     ?>
@@ -491,7 +507,8 @@ function linkate_posts_expert_options_subpage()
         <div class="mt-4 <?= CL_TWC::$CARD_SPECIAL ?>">
             <h2 id="recovery" class="<?= CL_TWC::$H2 ?>">Прочие настройки</h2>
             <form method="post" action="">
-                <input type="submit" class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="recreate_db" value="<?php _e('Пересоздать базы данных', CHERRYLINK_TEXT_DOMAIN) ?>" />
+                <input class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="truncate_all" type="submit" value="Очистить таблицы ссылок в БД"/>
+                <input type="submit" class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="recreate_db" value="<?php _e('Пересоздать таблицы БД', CHERRYLINK_TEXT_DOMAIN) ?>" />
 
                 <input type="submit" class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="reset_options" value="<?php _e('Вернуть настройки по умолчанию', CHERRYLINK_TEXT_DOMAIN) ?>" />
                 <?php if (function_exists('wp_nonce_field')) wp_nonce_field('linkate-posts-update-options'); ?>
@@ -503,29 +520,7 @@ function linkate_posts_expert_options_subpage()
 
 function linkate_posts_index_options_subpage()
 {
-    global $wpdb, $table_prefix;
     $options = get_option('linkate-posts', []);
-    $options_meta = get_option('linkate_posts_meta', []);
-    $table_index = $table_prefix . "linkate_posts";
-    $table_scheme = $table_prefix . "linkate_scheme";
-
-
-    if (isset($_POST['truncate_all'])) {
-        // check_admin_referer('linkate-posts-update-options');
-        // Remove scheme
-        unset($options['linkate_scheme_exists']);
-        unset($options['linkate_scheme_time']);
-        update_option('linkate-posts', $options);
-
-        unset($options_meta['indexing_process']);
-        update_option('linkate_posts_meta', $options_meta);
-        $wpdb->query("TRUNCATE `$table_scheme`");
-        // Remove index
-        $wpdb->query("TRUNCATE `$table_index`");
-
-        // Show a message to say we've done something
-        echo '<div class="notice-success notice"><p>' . __('<b>Базы данных плагина очищены.</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
-    }
 
     //php moved below for ajax
 ?>
@@ -561,7 +556,7 @@ function linkate_posts_index_options_subpage()
                         // link_cf_display_clean_suggestions_stoplist($options['clean_suggestions_stoplist']);
                         ?>
                     </table>
-                    <!-- <input type="submit" class="<?= CL_TWC::$BTN_DANGER ?>" name="truncate_all" value="<?php _e('Очистить все записи', CHERRYLINK_TEXT_DOMAIN) ?>" /> -->
+
                 </form>
             </div>
 
@@ -596,22 +591,7 @@ function linkate_posts_index_options_subpage()
                 </div>
             </div>
         </div>
-        <?php $show_options = (isset($options['linkate_scheme_exists']) &&  $options['linkate_scheme_exists']) ? 'block' : 'none'; ?>
-        <div class="<?= CL_TWC::$CARD ?> mt-6" style="display: <?php echo $show_options; ?>">
 
-            <input type="checkbox" id="spoiler_scheme" />
-            <label for="spoiler_scheme" class="hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 hover:cursor-pointer">Экспорт перелинковки в .CSV</label>
-
-            <div class="spoiler_scheme">
-
-                <form id="form_generate_csv" method="post" action="">
-                    <?php link_cf_display_scheme_export_options(); ?>
-                    <progress id="csv_progress"></progress>
-                    <div class="submit"><input id="generate_csv" type="submit" class="<?= CL_TWC::$BTN_NORMAL ?>" name="generate_csv" value="<?php _e('Скачать схему в .CSV', CHERRYLINK_TEXT_DOMAIN) ?>" /></div>
-
-                </form>
-            </div>
-        </div>
 
         <!--  We save and update index using ajax call, see function linkate_ajax_call_reindex below -->
     </div>
@@ -645,13 +625,10 @@ function linkate_posts_statistics_options_subpage()
             ?>
             <form id="form_generate_stats" method="post" action="">
                 <?php link_cf_display_scheme_statistics_options(); ?>
-                <progress id="csv_progress"></progress>
+                <progress id="link_check_progress"></progress>
                 <input id="generate_preview" type="submit" class="<?= CL_TWC::$BTN_NORMAL ?>" name="generate_preview" value="<?php _e('Проверить перелинковку', CHERRYLINK_TEXT_DOMAIN) ?>" />
             </form>
             <br>
-
-
-
         </div>
 
         <div id="cherry_preview_stats_container" style="display:none">
@@ -686,7 +663,22 @@ function linkate_posts_statistics_options_subpage()
                 </div>
             </div>
         </div>
+        <?php $show_options = (isset($options['linkate_scheme_exists']) &&  $options['linkate_scheme_exists']) ? 'block' : 'none'; ?>
+        <div class="<?= CL_TWC::$CARD ?> mt-6" style="display: <?php echo $show_options; ?>">
 
+            <input type="checkbox" id="spoiler_scheme" />
+            <label for="spoiler_scheme" class="hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 hover:cursor-pointer">Экспорт перелинковки в .CSV</label>
+
+            <div class="spoiler_scheme">
+
+                <form id="form_generate_csv" method="post" action="">
+                    <?php link_cf_display_scheme_export_options(); ?>
+                    <progress id="csv_progress"></progress>
+                    <input id="generate_csv" type="submit" class="<?= CL_TWC::$BTN_NORMAL ?>" name="generate_csv" value="<?php _e('Скачать схему в .CSV', CHERRYLINK_TEXT_DOMAIN) ?>" />
+
+                </form>
+            </div>
+        </div>
         <!--  We save and update index using ajax call, see function linkate_ajax_call_reindex below -->
     </div>
 

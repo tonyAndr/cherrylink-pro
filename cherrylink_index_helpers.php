@@ -179,7 +179,7 @@ class CL_Index_Helpers
             foreach ($wordlist as $word) {
                 if (mb_strlen($word) > $min_len || array_key_exists($word, $linkate_overusedwords["white"])) {
                     $stemm = $this->stemmer->stem_word($word);
-                    if (mb_strlen($stemm) <= 1) continue;
+                    if (mb_strlen($stemm) <= 2) continue;
                     if (!array_key_exists($stemm, $linkate_overusedwords["black"]))
                         $stemms .= $stemm . ' ';
                     if ($clean_suggestions_stoplist == 'false' || ($clean_suggestions_stoplist == 'true' && !array_key_exists($stemm, $linkate_overusedwords["black"])))
@@ -195,8 +195,14 @@ class CL_Index_Helpers
         }
 
         unset($wordlist);
-        if (empty($stemms) && !$this->stemmer->Stem_Enabled)
-            $stemms = implode(' ', $words);
+        if (empty($stemms) && !$this->stemmer->Stem_Enabled) $stemms = implode(' ', $words);
+
+        // remove spaces
+        $words = array_filter($words, function ($el) {
+            return !empty(trim($el));
+        });
+        $stemms = trim($stemms);
+
         return array($stemms, $words);
     }
 

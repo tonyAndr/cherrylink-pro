@@ -266,7 +266,7 @@ function linkate_generate_csv_or_json_prettyfied($is_custom_column = false, $cus
         linkate_query_to_csv($output_array, 'cherrylink_stats_' . $_POST['stats_offset'] . '.csv');
         $response = array();
         $response['status'] = 'OK';
-        $response['url'] = CHERRYLINK_DIR_URL . '/stats/cherrylink_stats_' . $_POST['stats_offset'] . '.csv';
+        $response['url'] = CHERRYLINK_DIR_URL . 'stats/cherrylink_stats_' . $_POST['stats_offset'] . '.csv';
         echo json_encode($response);
     }
 
@@ -323,7 +323,7 @@ function linkate_generate_csv_or_json_prettyfied_backwards()
     linkate_query_to_csv($output_array, 'cherrylink_stats_' . $_POST['stats_offset'] . '.csv');
     $response = array();
     $response['status'] = 'OK';
-    $response['url'] = CHERRYLINK_DIR_URL . '/stats/cherrylink_stats_' . $_POST['stats_offset'] . '.csv';
+    $response['url'] = CHERRYLINK_DIR_URL . 'stats/cherrylink_stats_' . $_POST['stats_offset'] . '.csv';
     echo json_encode($response);
 
     unset($output_array);
@@ -618,11 +618,11 @@ function linkate_query_to_csv($array, $filename)
     $headers = array($arr_post_id, $arr_post_type, $arr_post_cats, $arr_source_url, $arr_target, $arr_ankor, $arr_targets_count, $arr_sources_count);
 
     // create dir
-    if (!file_exists(CHERRYLINK_DIR . '/stats')) {
-        mkdir(CHERRYLINK_DIR . '/stats', 0755, true);
+    if (!file_exists(CHERRYLINK_DIR . 'stats')) {
+        mkdir(CHERRYLINK_DIR . 'stats', 0755, true);
     }
     //////////////////
-    $fp = fopen(CHERRYLINK_DIR . '/stats/' . $filename, 'w');
+    $fp = fopen(CHERRYLINK_DIR . 'stats/' . $filename, 'w');
 
     // output header row (if at least one row exists)
     array_walk($headers, 'linkate_encode_csv');
@@ -639,10 +639,10 @@ function linkate_query_to_csv($array, $filename)
 add_action('wp_ajax_linkate_merge_csv_files', 'linkate_merge_csv_files');
 function linkate_merge_csv_files()
 {
-    $directory = CHERRYLINK_DIR . '/stats/*'; // CSV Files Directory Path
+    $directory = CHERRYLINK_DIR . 'stats/*'; // CSV Files Directory Path
 
     // Open and Write Master CSV File
-    $masterCSVFile = fopen(CHERRYLINK_DIR . '/stats/cherrylink_stats.csv', "w+");
+    $masterCSVFile = fopen(CHERRYLINK_DIR . 'stats/cherrylink_stats.csv', "w+");
     $first_file = true;
     // Process each CSV file inside root directory
     foreach (glob($directory) as $file) {
@@ -685,18 +685,18 @@ function linkate_merge_csv_files()
     linkate_stats_remove_old(true);
     $response = array();
     $response['status'] = 'OK';
-    $response['url'] = CHERRYLINK_DIR_URL . '/stats/cherrylink_stats.csv';
+    $response['url'] = CHERRYLINK_DIR_URL . 'stats/cherrylink_stats.csv';
     echo json_encode($response);
     wp_die();
 }
 
 function linkate_stats_remove_old($onlytemp_files = false)
 {
-    if (!file_exists(CHERRYLINK_DIR . '/stats')) {
+    if (!file_exists(CHERRYLINK_DIR . 'stats')) {
         return;
     }
 
-    $files = glob(CHERRYLINK_DIR . '/stats/*'); // get all file names
+    $files = glob(CHERRYLINK_DIR . 'stats/*'); // get all file names
     foreach ($files as $file) { // iterate files
         if (is_file($file)) {
             if ($onlytemp_files && strpos($file, 'cherrylink_stats_') !== false) {
