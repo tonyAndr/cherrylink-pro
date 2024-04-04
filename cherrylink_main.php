@@ -3,7 +3,7 @@
 Plugin Name: CherryLink Pro
 Plugin URI: http://seocherry.ru/
 Description: Плагин для упрощения ручной внутренней перелинковки. Поиск релевантных ссылок, ускорение монотонных действий, гибкие настройки, удобная статистика и экспорт.
-Version: 0.9.2
+Version: 0.9.3
 Author: Anton SeoCherry.ru
 Author URI: http://seocherry.ru/
 Text Domain: cherrylink-td
@@ -52,6 +52,11 @@ if (!defined('LINKATE_TAILWIND_CONSTANTS')) require(CHERRYLINK_DIR . '/cherrylin
 if (!defined('LINKATE_STEMMER_RU')) require(CHERRYLINK_DIR . "/cherrylink_stemmer_ru.php");
 if (!defined('LINKATE_INDEX_HELPERS')) require(CHERRYLINK_DIR . "/cherrylink_index_helpers.php");
 if (!defined('LINKATE_STATS_SCHEME')) require(CHERRYLINK_DIR . "/cherrylink_stats_scheme.php");
+
+if (is_admin()) {
+    require(CHERRYLINK_DIR . '/cherrylink_admin_options.php');
+    require(CHERRYLINK_DIR . '/cherrylink_editor_ui.php');
+}
 
 
 // ========================================================================================= //
@@ -294,9 +299,9 @@ class LinkatePosts
 
         _cherry_debug(__FUNCTION__, $presentation_mode, 'Как обработать результаты?');
         switch ($presentation_mode) {
-            // case 'related_block':
-            //     return CL_Related_Block::prepare_related_block($postid, $results, $option_key, $options);
-            //     break;
+                // case 'related_block':
+                //     return CL_Related_Block::prepare_related_block($postid, $results, $option_key, $options);
+                //     break;
             case 'gutenberg':
                 return LinkatePosts::prepare_for_cherry_gutenberg($results, $option_key, $options);
                 break;
@@ -451,23 +456,6 @@ function cherrylink_activation_notice()
             <p>Перейдите в настройки плагина на вкладку <a href="<?php echo site_url() . '/wp-admin/options-general.php?page=cherrylink-pro&subpage=scan'; ?>">Сканирование</a>, и нажмите на кнопку "<strong>Начать сканирование</strong>".</p>
         </div>
 <?php
-    }
-}
-
-if (is_admin()) {
-    require(dirname(__FILE__) . '/cherrylink_admin_options.php');
-
-    if (linkate_callDelay() && linkate_lastStatus()) {
-        $r = true;
-    }
-    if (linkate_callDelay() && !linkate_lastStatus()) {
-        $r = false;
-    }
-    if (!linkate_callDelay()) {
-        $r = linkate_checkNeededOption();
-    }
-    if ($r) {
-        require(CHERRYLINK_DIR . '/cherrylink_editor_ui.php');
     }
 }
 

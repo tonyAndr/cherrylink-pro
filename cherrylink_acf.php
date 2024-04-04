@@ -799,7 +799,6 @@ function link_cf_display_scheme_export_options()
 
         </div>
     </div>
-    <p>Если возникнут затруднения с экспортом/импортом в эксель - посмотрите <a href="https://seocherry.ru/dev/statistika-vnutrennej-perelinkovki-v-cherrylink-jeksport-iz-plagina-i-import-v-excel/">этот пост</a>.</p>
 <?php
 }
 function link_cf_display_scheme_statistics_options()

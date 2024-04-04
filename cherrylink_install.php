@@ -334,7 +334,7 @@ function fill_options($options)
     if (!isset($options['hash_field'])) $options['hash_field'] = '';
     if (!isset($options['custom_stopwords'])) $options['custom_stopwords'] = '';
     if (!isset($options['term_length_limit'])) $options['term_length_limit'] = 3;
-    if (!isset($options['multilink'])) $options['multilink'] = '';
+    if (!isset($options['multilink'])) $options['multilink'] = 'checked';
     if (!isset($options['compare_seotitle'])) $options['compare_seotitle'] = '';
     if (!isset($options['hash_last_check'])) $options['hash_last_check'] = 1523569887;
     if (!isset($options['hash_last_status'])) $options['hash_last_status'] = false;
@@ -415,114 +415,83 @@ if (!function_exists('link_cf_plugin_basename')) {
     }
 }
 
+function linkate_handle_license_response()
+{
+    $options = get_option('linkate-posts', []);
+    $options_meta = get_option('linkate_posts_meta', []);
+    $domain = isset($_SERVER['HTTP_HOST']) ?  $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+
+    $response = linkate_call_home_nocurl($options['hash_field'], $domain);
+    if ($response !== false) {
+        // check response
+        if (intval($response->key_valid) === 1) {
+            $options_meta['key_valid'] = true;
+            $options_meta['expires_at'] = $response->expires_at;
+            $options_meta['key_error_reason'] = '';
+        } else {
+            $options_meta['key_valid'] = false;
+            $options_meta['expires_at'] = $response->expires_at;
+            $options_meta['key_error_reason'] = $response->key_error_reason;
+        }
+        
+        
+    } else {
+        // probably server/connection error
+        // don't activate, if first time
+        if (!isset($options_meta['key_valid']) || !$options_meta['key_valid']) {
+            $options_meta['key_valid'] = false;
+            $options_meta['key_error_reason'] = 'no_connection';
+        } else {
+            return true;
+        }
+    }
+    update_option('linkate_posts_meta', $options_meta);
+
+    cherry_write_log('key validation');
+    cherry_write_log($options_meta['key_valid']);
+    return $options_meta['key_valid'];
+}
+
 function linkate_checkNeededOption()
 {
-    $options = get_option('linkate-posts', []);
-    $arr = getNeededOption();
-    $final = false;
-    $status = '';
-    $actLeft = false;
-    if ($arr != NULL) {
-        $d = isset($_SERVER['HTTP_HOST']) ?  $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
-        $h = hash('sha256', $d);
-        for ($i = 0; $i < sizeof($arr); $i++) {
-            $a = base64_decode($arr[$i]);
-            if ($h == $a) {
-                $final = true; //'true,oldkey_good';
-                $status = 'ok_old';
-                //echo $status;
-                return $final;
-            }
-        }
-        if (function_exists('curl_init')) {
-            $resp = explode(',', linkate_call_home(base64_encode(implode(',', $arr)), $d));
-            $final = $resp[0] == 'true' ? true : false; // new
-            $status = $resp[1];
-            $actLeft = isset($resp[2]) ? $resp[2] : false;
-        } elseif (function_exists('wp_remote_post')) {
-            $resp = explode(',', linkate_call_home_nocurl(base64_encode(implode(',', $arr)), $d));
-            $final = $resp[0] == 'true' ? true : false; // new
-            $status = $resp[1];
-            $actLeft = isset($resp[2]) ? $resp[2] : false;
-        } else {
-            $final = false;
-            $status = 'Нет связи с сервером лицензий. Плагин не может быть активирован (обратитесь в техподдержку).';
-            echo $status;
-        }
-    }
-
-    if ($final) {
-        $options['hash_last_check'] = time() + 604800; // week
-        $options['hash_last_status'] = true;
-    } else {
-        $options['hash_last_check'] = 0;
-        $options['hash_last_status'] = false;
-    }
-
-    if ($actLeft) {
-        $options['activations_left'] = intval($actLeft);
-    }
-
-    update_option('linkate-posts', $options);
-    //echo $status;
-    return $final;
+    $options = get_option('linkate_posts_meta', []);
+    if (isset($options['key_valid']) && $options['key_valid']) {
+        $now = time();
+        $date_valid = strtotime($options['expires_at']) > $now;
+        return $date_valid;
+    } 
+    return false;
 }
 
-function getNeededOption()
-{
-    $options = get_option('linkate-posts', []);
-    $s = isset($options['hash_field']) ? $options['hash_field'] : '';
-    if (empty($s)) {
-        return NULL;
-    } else {
-        return explode(",", base64_decode($s));
-    }
-}
+// function getNeededOption()
+// {
+//     $options = get_option('linkate-posts', []);
+//     $s = isset($options['hash_field']) ? $options['hash_field'] : '';
+//     if (empty($s)) {
+//         return NULL;
+//     } else {
+//         return explode(",", base64_decode($s));
+//     }
+// }
 
-function linkate_callDelay()
-{
-    $options = get_option('linkate-posts', []);
-    if (!isset($options['hash_last_check']) || time() > $options['hash_last_check']) {
-        return false;
-    }
-    return true;
-}
-function linkate_lastStatus()
-{
-    $options = get_option('linkate-posts', []);
-    return isset($options['hash_last_status']) ? $options['hash_last_status'] : false;
-}
-
-function linkate_call_home($val, $d)
-{
-    $data = array('key' => $val, 'action' => 'getInfo', 'domain' => $d);
-    $url = 'https://seocherry.ru/plugins-license/';
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_POST, 1);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 1);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_TIMEOUT, 2);
-    $response = curl_exec($curl);
-    $error = curl_error($curl);
-    $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    if (curl_errno($curl)) {
-        return 'true,curl_error';
-    }
-    if ($status != 200) {
-        return 'true,' . $status;
-    }
-    curl_close($curl);
-    return $response;
-}
+// function linkate_callDelay()
+// {
+//     $options = get_option('linkate-posts', []);
+//     if (!isset($options['hash_last_check']) || time() > $options['hash_last_check']) {
+//         return false;
+//     }
+//     return true;
+// }
+// function linkate_lastStatus()
+// {
+//     $options = get_option('linkate-posts', []);
+//     return isset($options['hash_last_status']) ? $options['hash_last_status'] : false;
+// }
 
 function linkate_call_home_nocurl($val, $d)
 {
-    $data = array('key' => $val, 'action' => 'getInfo', 'domain' => $d);
-    $url = 'https://seocherry.ru/plugins-license/';
+    $data = array('license_key' => $val, 'action' => 'check', 'domain' => $d);
+    $url = 'https://seocherry.ru/cherrylink-pro-licensing/';
     $response = wp_remote_post(
         $url,
         array(
@@ -539,13 +508,36 @@ function linkate_call_home_nocurl($val, $d)
 
     if (is_wp_error($response)) {
         $error_message = $response->get_error_message();
-        return "false, $error_message";
+        return false;
     } elseif ($response['response']['code'] != 200) {
-        return 'true,' . $response['response']['code'];
+        // server down?
+        return false;
     } else {
-        return $response['body'];
+        return json_decode($response['body']);
     }
 }
+
+add_filter( 'cron_schedules', 'example_add_cron_interval' );
+function example_add_cron_interval( $schedules ) { 
+    $schedules['five_seconds'] = array(
+        'interval' => 5,
+        'display'  => esc_html__( 'Every Five Seconds' ), );
+    return $schedules;
+}
+
+add_action( 'clpro_license_cron_hook', 'clpro_license_exec' );
+
+if ( ! wp_next_scheduled( 'clpro_license_cron_hook' ) ) {
+    wp_schedule_event( time(), 'five_seconds', 'clpro_license_cron_hook' );
+}
+
+function clpro_license_exec () {
+    
+    linkate_handle_license_response();
+}
+
+
+
 // For some plugins to add access to cherrylink settings page
 function cherrylink_add_cap()
 {

@@ -43,29 +43,53 @@ function cherrylink_pro_options_page()
 function linkate_posts_license_field()
 {
     $options = get_option('linkate-posts', []);
+    $options_meta = get_option('linkate_posts_meta', []);
     if (isset($_POST['update_license'])) {
         check_admin_referer('linkate-posts-update-options');
         // Fill up the options with the values chosen...
         $options = link_cf_options_from_post($options, array('hash_field'));
         update_option('linkate-posts', $options);
+        linkate_handle_license_response();
         // Show a message to say we've done something
         echo '<div class=" notice-success notice"><p>' . __('<b>Обновление ключа</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
     }
     if (isset($_POST['remove_license'])) {
         check_admin_referer('linkate-posts-update-options');
         // Fill up the options with the values chosen...
-        $options['hash_last_check'] = 0;
-        $options['hash_last_status'] = false;
+        $options_meta['key_valid'] = false;
+        $options_meta['expires_at'] = '';
         $options['hash_field'] = '';
         unset($options['activations_left']);
 
         update_option('linkate-posts', $options);
+        update_option('linkate_posts_meta', $options_meta);
         // Show a message to say we've done something
         echo '<div class="notice-error notice"><p>' . __('<b>Ключ сброшен</b>', CHERRYLINK_TEXT_DOMAIN) . '</p></div>';
     }
-
-
+    // get updated meta
+    $options_meta = get_option('linkate_posts_meta', []);
     $info = linkate_checkNeededOption();
+    $key_error = '';
+    if (isset($options_meta['key_error_reason'])) {
+
+        switch ($options_meta['key_error_reason']) {
+            case 'no_connection':
+                $key_error = 'Нет связи с сервером. Попробуйте позже или обратитесь в тех. поддержку.';
+                break;
+            case 'bad_domain':
+                $key_error = 'Ключ привязан к другому домену, активация невозможна.';
+                break;
+            case 'key_expired':
+                $key_error = 'Срок действия ключа истек.';
+                break;
+            case 'wrong_key':
+                $key_error = 'Неверно указан ключ.';
+                break;
+            default:
+                $key_error = '';
+                break;
+        }
+    }
     if ($info) {
         $license_class = "border-4 border-lime-300 bg-white text-black";
         $license_header = "<h2 class='" . CL_TWC::$H2 . "'>Лицензия активирована</h2>";
@@ -88,6 +112,13 @@ function linkate_posts_license_field()
                 <label class="font-bold" for="hash_field"><?php _e('Ваш ключ:', CHERRYLINK_TEXT_DOMAIN) ?></label>
                 <br>
                 <input type="text" name="hash_field" id="hash_field" required class=" mt-2 <?= CL_TWC::$INP_BASE ?>" value="<?php echo htmlspecialchars(stripslashes($options['hash_field'])); ?>">
+                <?php
+                if ($key_error) {
+                ?>
+                    <p style="font-weight:bold; color:red"><?= $key_error ?></p>
+                <?php
+                }
+                ?>
                 <br>
                 <input type="submit" class="<?= CL_TWC::$BTN_SAVE ?> " name="update_license" value="<?php _e('Сохранить', CHERRYLINK_TEXT_DOMAIN) ?>" />
                 <?php if (function_exists('wp_nonce_field')) wp_nonce_field('linkate-posts-update-options'); ?>
@@ -154,7 +185,7 @@ function linkate_posts_index_status_display($page = 'main')
             <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=statistics"><button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2">Поиск проблем</button></a>
             <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=scan"><button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2"><?= $index_process_status === 'DONE' ? "Сканировать сайт" :  "Пересканировать" ?></button></a>
         <?php
-        } 
+        }
 
         //link_cf_prepare_tooltip('                <p>Справа от заголовка "Статус индексирования" есть шильдик с одним из вариантов:</p><ul><li>[Индекс не создан]</li>                <li>[Создание индекса не закончено]</li><li>[Индекс создан]</li></ul>                <p>Текст "Создание индекса не закончено" обычно означает, что индексация не завершилась корректно.                 Рекомендуется пересоздать индекс. Эта же надпись появится, если вы создаете индекс прямо сейчас, например, в другой вкладке браузера.</p>                <p>Текст "Индекс не создан" говорит сам за себя. Необходимо его создать кнопкой "Пересоздать индекс".</p>                <p>Если [Индекс создан], или шильдика с надписью нет вообще, то никаких действий не требуется.</p>'); 
         ?>
@@ -222,7 +253,14 @@ function linkate_posts_main_options_subpage()
                 <?php linkate_posts_index_status_display('main'); ?>
 
                 <div class="<?= CL_TWC::$CARD ?>">
-                    Тут справка, видео, прочие материалы
+                    <h2 class="<?= CL_TWC::$H2 ?>">Справочные материалы</h2>
+                    <ol>
+                        <li><a target="_blank" href="https://seocherry.ru/plagin-cherrylink-pro-arenda/">🔗 Тарифы и получение ключа</a></li>
+                        <li><a target="_blank" href="https://seocherry.ru/instruktsiya-po-nastroike-plagina-cherrylink/">🔗 Настройки плагина</a></li>
+                        <li><a target="_blank" href="https://seocherry.ru/instruktsiya-po-rabote-s-plaginom-perelinkovki-v-redaktore-wordpress/">🔗 Работа в редакторе WP</a></li>
+                        <li><a target="_blank" href="https://seocherry.ru/instruktsii-plaginov-wordpress-v-video-formate-shorts/">🔗 Видео-инструкции</a></li>
+                        <li><a target="_blank" href="https://seocherry.ru/zapisi-o-rabote-v-internet-seti-seo-instrumenty-znacheniya-pravila/">🔗 Полезные материалы про перелинковку</a></li>
+                    </ol>
                 </div>
             </div>
             <div class="grid grid-col-1 gap-4">
@@ -403,7 +441,7 @@ function linkate_posts_expert_options_subpage()
                     </div>
                 </div>
                 <div class="<?= CL_TWC::$CARD ?>">
-                    <h2 id="anchor-editor" class="<?= CL_TWC::$H2 ?>">Настройка панель CherryLink в редакторе</h2>
+                    <h2 id="anchor-editor" class="<?= CL_TWC::$H2 ?>">Настройки работы в редакторе WP</h2>
                     <table class="optiontable form-table">
                         <?php
                         link_cf_display_output_template($options['output_template']);
@@ -507,7 +545,7 @@ function linkate_posts_expert_options_subpage()
         <div class="mt-4 <?= CL_TWC::$CARD_SPECIAL ?>">
             <h2 id="recovery" class="<?= CL_TWC::$H2 ?>">Прочие настройки</h2>
             <form method="post" action="">
-                <input class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="truncate_all" type="submit" value="Очистить таблицы ссылок в БД"/>
+                <input class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="truncate_all" type="submit" value="Очистить таблицы ссылок в БД" />
                 <input type="submit" class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="recreate_db" value="<?php _e('Пересоздать таблицы БД', CHERRYLINK_TEXT_DOMAIN) ?>" />
 
                 <input type="submit" class="<?= CL_TWC::$BTN_DANGER ?> mt-2" name="reset_options" value="<?php _e('Вернуть настройки по умолчанию', CHERRYLINK_TEXT_DOMAIN) ?>" />
@@ -620,7 +658,7 @@ function linkate_posts_statistics_options_subpage()
                 <li>Нет входящих ссылок;</li>
                 <li>Нет исходящих ссылок.</li>
             </ol>
-            <p>Подробную статистику по перелинковке вы можете скачать в формате CSV с помощью инструмента Экспорт перелинковки на вкладке "Индекс ссылок".</p>
+            <!-- <p>Подробную статистику по перелинковке вы можете скачать в формате CSV с помощью инструмента Экспорт перелинковки на вкладке "Индекс ссылок".</p> -->
             <?php //link_cf_prepare_tooltip(''); 
             ?>
             <form id="form_generate_stats" method="post" action="">

@@ -5,6 +5,12 @@
 
 // Disable direct access
 defined('ABSPATH') || exit;
+// TODO CHECK LICENSE
+
+$options_meta = get_option('linkate_posts_meta', []);
+if (!isset($options_meta['key_valid']) || !$options_meta['key_valid']) {
+    return false;
+}
 
 add_action('admin_head', 'linkate_send_options_frontend');
 add_action('wp_ajax_get_linkate_links', 'get_linkate_links');
