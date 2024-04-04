@@ -3,7 +3,7 @@
 Plugin Name: CherryLink Pro
 Plugin URI: http://seocherry.ru/
 Description: Плагин для упрощения ручной внутренней перелинковки. Поиск релевантных ссылок, ускорение монотонных действий, гибкие настройки, удобная статистика и экспорт.
-Version: 0.9.3
+Version: 0.9.4
 Author: Anton SeoCherry.ru
 Author URI: http://seocherry.ru/
 Text Domain: cherrylink-td

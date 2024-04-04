@@ -517,18 +517,10 @@ function linkate_call_home_nocurl($val, $d)
     }
 }
 
-add_filter( 'cron_schedules', 'example_add_cron_interval' );
-function example_add_cron_interval( $schedules ) { 
-    $schedules['five_seconds'] = array(
-        'interval' => 5,
-        'display'  => esc_html__( 'Every Five Seconds' ), );
-    return $schedules;
-}
-
 add_action( 'clpro_license_cron_hook', 'clpro_license_exec' );
 
 if ( ! wp_next_scheduled( 'clpro_license_cron_hook' ) ) {
-    wp_schedule_event( time(), 'five_seconds', 'clpro_license_cron_hook' );
+    wp_schedule_event( time(), 'daily', 'clpro_license_cron_hook' );
 }
 
 function clpro_license_exec () {
