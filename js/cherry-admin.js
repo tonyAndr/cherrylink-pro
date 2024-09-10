@@ -81,4 +81,76 @@ jQuery(document).ready(function($){
     //     }
     // });
 
+
+    /*
+	--- === Debugger === ---
+	*/
+
+
+    $("#admin_debug_btn").on('click', function (e) {
+        e.preventDefault()
+        $("#admin_debug_output_field").html("Идет загрузка...")
+        let post_id = $("#admin_debug_post_id").val();
+        if (!post_id) {
+            alert('Нужен ID записи')
+        }
+        show_debugger_env(post_id);
+    })
+
+    function show_debugger_env(post_id) {
+        
+        $.ajax({
+            type: "GET",
+            url: ajaxurl + "?action=output_admin_debug_env",
+            datatype: 'json',
+            success: function (response) {
+                $("#admin_debug_output_field").text(response)
+                show_debugger_links(post_id);
+            }
+        });
+    }
+
+    function show_debugger_links(post_id)
+    {
+        $.ajax({
+            type: "POST",
+            url: ajaxurl + "?action=output_admin_debug_links",
+            data: {post_id},
+            datatype: 'json',
+            success: function (response) {
+                $("#admin_debug_output_field").append(JSON.stringify(response))
+                
+                if (response.links) {
+                    let json_parser_info = "\n\n ==================================";
+                    json_parser_info += "\n Json Parser Info \n\n";
+                    try {
+                        let parsed = JSON.parse(response.links)
+                        // has to be an array
+                        json_parser_info += "Parsed count: " + parsed.length
+                    } catch (error) {
+                        json_parser_info += "Parsed count: 0";
+                        json_parser_info += "\n\n Error msg: " + error;
+                    } 
+                    
+                    $("#admin_debug_output_field").append(json_parser_info)
+                }
+
+                show_debugger_wpdb()
+            }
+        });
+        
+    }
+
+    function show_debugger_wpdb() {
+        
+        $.ajax({
+            type: "GET",
+            url: ajaxurl + "?action=output_admin_debug_wpdb",
+            datatype: 'json',
+            success: function (response) {
+                $("#admin_debug_output_field").append(response)
+            }
+        });
+    }
+
 });

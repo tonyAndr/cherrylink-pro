@@ -540,6 +540,25 @@ function linkate_posts_expert_options_subpage()
                     <?php if (function_exists('wp_nonce_field')) wp_nonce_field('linkate-posts-update-options'); ?>
                 </div>
 
+                <div class="<?= CL_TWC::$CARD ?>">
+                    <input type="checkbox" id="spoiler_debug" />
+                    <label for="spoiler_debug" id="label_spoiler_debug" class="hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 hover:cursor-pointer">⚙ Отладка</label>
+
+                    <div class="spoiler_debug">
+                        <p>Служебный блок для отладки ошибок.</p>
+                        <hr>
+                        <div style="display:flex;flex-flow: column; width: 100%;">
+                            <div style="display:flex;flex-flow: row; width: 100%; gap: 1em; margin-top:2em; margin-bottom:2em">
+                                <input type="text" id="admin_debug_post_id" placeholder="ID записи" />
+                                <button id="admin_debug_btn" class="<?= CL_TWC::$BTN_NORMAL ?>">Проверить</button>
+                            </div>  
+                            
+                            <h3>Информация для разработчиков</h3>
+                            <textarea id="admin_debug_output_field" style="width: 100%" rows="10"></textarea>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </form>
         <div class="mt-4 <?= CL_TWC::$CARD_SPECIAL ?>">

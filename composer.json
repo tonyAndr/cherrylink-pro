@@ -1,0 +1,5 @@
+{
+    "require": {
+        "abelcallejo/wordpress-environment": "dev-master"
+    }
+}

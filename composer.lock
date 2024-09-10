@@ -1,9 +1,14 @@
 {
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "70319d483abd1ac5eccd9b01054f59f3",
     "packages": [
         {
             "name": "abelcallejo/wordpress-environment",
             "version": "dev-master",
-            "version_normalized": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/abelcallejo/wordpress-environment.git",
@@ -18,10 +23,8 @@
             "require": {
                 "php": ">=5.2.0"
             },
-            "time": "2018-09-04T22:24:22+00:00",
             "default-branch": true,
             "type": "library",
-            "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -40,9 +43,18 @@
                 "issues": "https://github.com/abelcallejo/wordpress-environment/issues",
                 "source": "https://github.com/abelcallejo/wordpress-environment/tree/master"
             },
-            "install-path": "../abelcallejo/wordpress-environment"
+            "time": "2018-09-04T22:24:22+00:00"
         }
     ],
-    "dev": true,
-    "dev-package-names": []
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "abelcallejo/wordpress-environment": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
 }

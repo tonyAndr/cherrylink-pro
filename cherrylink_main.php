@@ -3,7 +3,7 @@
 Plugin Name: CherryLink Pro
 Plugin URI: http://seocherry.ru/
 Description: Плагин для упрощения ручной внутренней перелинковки. Поиск релевантных ссылок, ускорение монотонных действий, гибкие настройки, удобная статистика и экспорт.
-Version: 0.9.5
+Version: 0.9.6
 Author: Anton SeoCherry.ru
 Author URI: http://seocherry.ru/
 Text Domain: cherrylink-td
@@ -29,6 +29,8 @@ define('CHERRYLINK_INITIAL_LIMIT', 100);
 define('CHERRYLINK_TEXT_DOMAIN', 'cherrylink-td');
 define('CHERRYLINK_DIR', plugin_dir_path(__FILE__));
 define('CHERRYLINK_DIR_URL', plugin_dir_url(__FILE__));
+
+require(CHERRYLINK_DIR . '/env-info/W18T.class.php');
 
 if (!defined('LINKATE_DEBUG')) require(CHERRYLINK_DIR . '/cherrylink_debug.php');
 
@@ -196,11 +198,11 @@ class LinkatePosts
                     $sql .= link_cf_score_fulltext_match($table_name, $weight_title, $titleterms, $weight_content, $contentterms, $weight_custom, $customterms, $match_against_title);
                     $sql .= " WHERE " . link_cf_where_fulltext_match($weight_title, $titleterms, $weight_content, $contentterms, $weight_custom, $customterms, $match_against_title);
                     $sql .= " AND pID <> $postid AND is_term = 0 ORDER BY score DESC LIMIT 0, 1000) as linkate_table";
-                    _cherry_debug(__FUNCTION__, $sql, 'wp_linkate_posts SQL query');
+                    CHERRYLINK_DEBUGGER::deprecated_cherry_debug(__FUNCTION__, $sql, 'wp_linkate_posts SQL query');
                     $EXEC_TIME = microtime(true);
                     $rel_ids = $wpdb->get_col($sql);
                     $time_elapsed_secs = microtime(true) - $EXEC_TIME;
-                    _cherry_debug(__FUNCTION__, count($rel_ids), 'Результат SELECT wp_linkate_posts, время выполнения: ' . $time_elapsed_secs);
+                    CHERRYLINK_DEBUGGER::deprecated_cherry_debug(__FUNCTION__, count($rel_ids), 'Результат SELECT wp_linkate_posts, время выполнения: ' . $time_elapsed_secs);
                 }
                 if ($rel_ids) {
                     $in_relevant_clause = " ID IN (" . implode(",", $rel_ids) . ") ";
@@ -253,11 +255,24 @@ class LinkatePosts
 
 
 
-                _cherry_debug(__FUNCTION__, $sql, 'wp_posts SQL query');
+                CHERRYLINK_DEBUGGER::deprecated_cherry_debug(__FUNCTION__, $sql, 'wp_posts SQL query');
                 $EXEC_TIME = microtime(true);
                 $results = $wpdb->get_results($sql);
+
+                try {
+                    // save last db call for debug reasons
+                    $db_response['query'] = $wpdb->last_query;
+                    $db_response['error'] = $wpdb->last_error;
+                    if ($wpdb->last_result && is_array($wpdb->last_result)) {
+                        $db_response['result_count'] = count($wpdb->last_result);
+                    }
+                    update_option('cherry_debug_info', $db_response);
+                } catch (Exception $excc) {
+                    // do nothing
+                }
+
                 $time_elapsed_secs = microtime(true) - $EXEC_TIME;
-                _cherry_debug(__FUNCTION__, count($results), 'Результат SELECT wp_posts, время выполнения: ' . $time_elapsed_secs);
+                CHERRYLINK_DEBUGGER::deprecated_cherry_debug(__FUNCTION__, count($results), 'Результат SELECT wp_posts, время выполнения: ' . $time_elapsed_secs);
 
                 // remove duplicates
                 $ids_list = array();
@@ -273,7 +288,7 @@ class LinkatePosts
                     return !in_array($k, $duplicates);
                 }, ARRAY_FILTER_USE_KEY);
 
-                _cherry_debug(__FUNCTION__, count($results), 'После фильтра дублей');
+                CHERRYLINK_DEBUGGER::deprecated_cherry_debug(__FUNCTION__, count($results), 'После фильтра дублей');
 
 
                 // filter buy max incoming links
@@ -297,7 +312,7 @@ class LinkatePosts
             $results = false;
         }
 
-        _cherry_debug(__FUNCTION__, $presentation_mode, 'Как обработать результаты?');
+        CHERRYLINK_DEBUGGER::deprecated_cherry_debug(__FUNCTION__, $presentation_mode, 'Как обработать результаты?');
         switch ($presentation_mode) {
                 // case 'related_block':
                 //     return CL_Related_Block::prepare_related_block($postid, $results, $option_key, $options);
