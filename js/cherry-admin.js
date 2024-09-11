@@ -117,24 +117,36 @@ jQuery(document).ready(function($){
             url: ajaxurl + "?action=output_admin_debug_links",
             data: {post_id},
             datatype: 'json',
-            success: function (response) {
-                $("#admin_debug_output_field").append(JSON.stringify(response))
+            success: function (data, textStatus, jqXHR) {
+
+                if (data) {
+                    $("#admin_debug_output_field").append(JSON.stringify(data))
                 
-                if (response.links) {
-                    let json_parser_info = "\n\n ==================================";
-                    json_parser_info += "\n Json Parser Info \n\n";
-                    try {
-                        let parsed = JSON.parse(response.links)
-                        // has to be an array
-                        json_parser_info += "Parsed count: " + parsed.length
-                    } catch (error) {
-                        json_parser_info += "Parsed count: 0";
-                        json_parser_info += "\n\n Error msg: " + error;
-                    } 
-                    
-                    $("#admin_debug_output_field").append(json_parser_info)
+                    if (data.links) {
+                        let json_parser_info = "\n\n ==================================";
+                        json_parser_info += "\n Json Parser Info \n\n";
+                        try {
+                            let parsed = JSON.parse(data.links)
+                            // has to be an array
+                            json_parser_info += "Parsed count: " + parsed.length
+                        } catch (error) {
+                            json_parser_info += "Parsed count: 0";
+                            json_parser_info += "\n\n Error msg: " + error;
+                        } 
+                        
+                        $("#admin_debug_output_field").append(json_parser_info)
+                    }
                 }
 
+                
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $("#admin_debug_output_field").append(errorThrown)
+                if (jqXHR) {
+                    $("#admin_debug_output_field").append(jqXHR.responseText)
+                }
+            }, 
+            complete: function (data, textStatus, errorThrown) { //data|jqXHR, textStatus, jqXHR|errorThrown
                 show_debugger_wpdb()
             }
         });

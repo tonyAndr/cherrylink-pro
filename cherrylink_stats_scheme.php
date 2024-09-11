@@ -138,7 +138,14 @@ class CL_Stats_Scheme
         // set error level, get rid of some warnings
         $internalErrors = libxml_use_internal_errors(true);
         $doc = new DOMDocument('1.0', 'UTF-8');
-        $doc->loadHTML(mb_convert_encoding($str, 'HTML-ENTITIES', 'UTF-8'));
+        // $doc->loadHTML(mb_convert_encoding($str, 'HTML-ENTITIES', 'UTF-8'));
+        $doc->loadHTML(mb_encode_numericentity(
+            htmlspecialchars_decode(
+                htmlentities($str, ENT_NOQUOTES, 'UTF-8', false)
+                ,ENT_NOQUOTES
+            ), [0x80, 0x10FFFF, 0, ~0],
+            'UTF-8'
+        ));
         // Restore error level
         libxml_use_internal_errors($internalErrors);
         $selector = new DOMXPath($doc);

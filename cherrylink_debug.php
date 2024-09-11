@@ -14,15 +14,15 @@ class CHERRYLINK_DEBUGGER
 
     public static function deprecated_cherry_debug($func, $variable, $description = '')
     {
-        $options = get_option('linkate-posts', []); 
-        if ($options['debug_enabled'] === "true") {
-            echo "FUNC: " . $func . PHP_EOL;
-            if ($description)
-                echo $description . PHP_EOL;
-            echo '<pre>';
-            var_dump($variable);
-            echo '</pre>';
-        }
+        // $options = get_option('linkate-posts', []); 
+        // if ($options['debug_enabled'] === "true") {
+        //     echo "FUNC: " . $func . PHP_EOL;
+        //     if ($description)
+        //         echo $description . PHP_EOL;
+        //     echo '<pre>';
+        //     var_dump($variable);
+        //     echo '</pre>';
+        // }
     }
 
     public static function _admin_debug_env()
@@ -67,7 +67,14 @@ class CHERRYLINK_DEBUGGER
         $custom_text = '';
         $mode = 'gutenberg';
 
+        $data = '';
         $data =  linkate_posts("manual_ID=" . $post_id . "&is_term=" . $is_term . "&offset=" . $offset . "&mode=" . $mode . "&custom_text=" . $custom_text . "&");
+        // try {
+
+        // } catch (Exception $e) {
+        //     $data = $e->getMessage();
+        //     $data .= PHP_EOL . $e->getTraceAsString();
+        // }
 
         wp_send_json($data);
     }
