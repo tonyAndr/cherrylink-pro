@@ -432,7 +432,6 @@ function link_cf_display_show_pages($show_pages)
 
 function link_cf_display_show_custom_posts($show_customs)
 {
-    $hide_types = array('post', 'page', 'attachment', 'wp_block', 'revision', 'nav_menu_item', 'custom_css', 'oembed_cache', 'user_request', 'customize_changeset');
     $args = array(
         'public'   => true,
         '_builtin' => false
@@ -738,35 +737,36 @@ function link_cf_display_included_posts($included_posts)
 
 function link_cf_display_scheme_export_options()
 {
-    $hide_types = array('attachment', 'wp_block', 'revision', 'nav_menu_item', 'custom_css', 'oembed_cache', 'user_request', 'customize_changeset', 'sticky_ad', 'post_format', 'nav_menu', 'link_category', 'tablepress_table');
 
+    $hide_types = array('attachment', 'wp_block', 'revision', 'nav_menu_item', 'custom_css', 'oembed_cache', 'user_request', 'customize_changeset', 'post_format', 'nav_menu', 'link_category');
     $args = array(
         'public'   => true,
+        // '_builtin' => true
     );
 ?>
     <div style="display: flex">
         <div>
-            <p><strong>Типы записей и таксономий</strong></p>
+            <p><strong>Типы записей</strong></p>
             <table class="linkateposts-inner-table">
                 <?php
-                $types = get_post_types($args, 'object');
+                $types = get_post_types($args, 'objects');
                 if ($types) {
                     echo "\n\t<tr valign=\"top\"><td colspan=\"2\"><strong>Типы публикаций</strong></td></tr>";
                     foreach ($types as $type) {
-                        if (false === in_array($type->name, $hide_types)) {
+                        if (!in_array($type->name, $hide_types)) {
                             echo "\n\t<tr valign=\"top\"><td>$type->label</td><td><input type=\"checkbox\" name=\"export_types[]\" value=\"$type->name\" checked /></td></tr>";
                         }
                     }
                 }
-                $taxonomies = get_taxonomies(array(), 'names');
-                if ($taxonomies) {
-                    echo "\n\t<tr valign=\"top\"><td colspan=\"2\"><strong>Таксономии</strong></td></tr>";
-                    foreach ($taxonomies as $tax) {
-                        if (false === in_array($tax, $hide_types)) {
-                            echo "\n\t<tr valign=\"top\"><td>$tax</td><td><input type=\"checkbox\" name=\"export_types[]\" value=\"$tax\" checked /></td></tr>";
-                        }
-                    }
-                }
+                // $taxonomies = get_taxonomies(array(), 'names');
+                // if ($taxonomies) {
+                //     echo "\n\t<tr valign=\"top\"><td colspan=\"2\"><strong>Таксономии</strong></td></tr>";
+                //     foreach ($taxonomies as $tax) {
+                //         if (false === in_array($tax, $hide_types)) {
+                //             echo "\n\t<tr valign=\"top\"><td>$tax</td><td><input type=\"checkbox\" name=\"export_types[]\" value=\"$tax\" checked /></td></tr>";
+                //         }
+                //     }
+                // }
 
                 ?>
             </table>
@@ -804,17 +804,20 @@ function link_cf_display_scheme_export_options()
 function link_cf_display_scheme_statistics_options()
 {
     $hide_types = array('attachment', 'wp_block', 'revision', 'nav_menu_item', 'custom_css', 'oembed_cache', 'user_request', 'customize_changeset', 'post_format', 'nav_menu', 'link_category');
-    $show_types = array('post', 'page');
+    $args = array(
+        'public'   => true,
+        // '_builtin' => false
+    );
 ?>
     <h2>Опции поиска</h2>
     <div style="display: flex">
         <div style="display: inline-flex;">
             <?php
-            $types = get_post_types('', 'object');
+            $types = get_post_types($args, 'objects');
             if ($types) {
                 echo "\n\t<table class=\"linkateposts-inner-table\"><tr valign=\"top\"><td colspan=\"2\"><strong>Типы публикаций</strong></td></tr>";
                 foreach ($types as $type) {
-                    if (false !== in_array($type->name, $show_types)) {
+                    if (!in_array($type->name, $hide_types)) {
                         echo "\n\t<tr valign=\"top\"><td>$type->label</td><td><input type=\"checkbox\" name=\"export_types[]\" value=\"$type->name\" checked /></td></tr>";
                     }
                 }

@@ -3,7 +3,7 @@
 Plugin Name: CherryLink Pro
 Plugin URI: http://seocherry.ru/
 Description: Плагин для упрощения ручной внутренней перелинковки. Поиск релевантных ссылок, ускорение монотонных действий, гибкие настройки, удобная статистика и экспорт.
-Version: 0.9.7
+Version: 0.9.8
 Author: Anton SeoCherry.ru
 Author URI: http://seocherry.ru/
 Text Domain: cherrylink-td
@@ -211,7 +211,7 @@ class LinkatePosts
 
             // build and execute main query
             if ($ignore_relevance || $rel_ids) {
-                $sql = "SELECT ID,post_content,post_title,post_author,post_excerpt,post_date FROM $wpdb->posts ";
+                $sql = "SELECT ID,post_content,post_title,post_author,post_excerpt,post_date,post_type FROM $wpdb->posts ";
 
                 if ($check_custom) $sql .= "LEFT JOIN $wpdb->postmeta wpp ON post_id = ID ";
 

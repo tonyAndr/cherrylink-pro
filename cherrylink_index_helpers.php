@@ -23,6 +23,7 @@ class CL_Index_Helpers
 
         $this->table_prefix = $wpdb->prefix;
 
+        // $hide_types = array('attachment', 'wp_block', 'revision', 'nav_menu_item', 'custom_css', 'oembed_cache', 'user_request', 'customize_changeset', 'post_format', 'nav_menu', 'link_category');
         $args = array(
             'public'   => true,
             '_builtin' => false
@@ -31,7 +32,9 @@ class CL_Index_Helpers
         $this->allowed_post_types = ['post', 'page'];
         // add custom types
         foreach ($types as $type) {
-            $this->allowed_post_types[] = $type->name;
+            // if (!in_array($type->name, $hide_types)) {
+                $this->allowed_post_types[] = $type->name;
+            // }
         }
     }
 

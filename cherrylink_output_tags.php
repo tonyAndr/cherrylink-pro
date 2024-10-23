@@ -50,7 +50,7 @@ function linkate_otf_title_seo($option_key, $result, $ext)
 
     $seotitle = linkate_get_post_seo_title($result, $seo_meta_source);
 
-    if (empty($seotitle)) {
+    if (empty(trim($seotitle))) {
         $seotitle = $result->post_title;
     }
     $seotitle = htmlspecialchars($seotitle, ENT_QUOTES);
