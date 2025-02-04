@@ -164,7 +164,7 @@ class CL_Stats_Scheme
         $target_id = 0;
         $target_type = 0;
         $values_string = '';
-        $prohibited = array('.jpg', '.jpeg', '.tiff', '.bmp', '.psd', '.png', '.gif', '.webp', '.doc', '.docx', '.xlsx', '.xls', '.odt', '.pdf', '.ods', '.odf', '.ppt', '.pptx', '.txt', '.rtf', '.mp3', '.mp4', '.wav', '.avi', '.ogg', '.zip', '.7z', '.tar', '.gz', '.rar', 'attachment');
+        $prohibited = array('.jpg', '.jpeg', '.tiff', '.bmp', '.psd', '.png', '.gif', '.webp', '.doc', '.docx', '.xlsx', '.xls', '.odt', '.pdf', '.ods', '.odf', '.ppt', '.pptx', '.txt', '.rtf', '.mp3', '.mp4', '.wav', '.avi', '.ogg', '.zip', '.7z', '.tar', '.gz', '.rar', 'attachment', 'tel:', 'mailto:', 'telnet:', 'ssh:', 'comgooglemaps:', 'geo:', 'ftp:', 'file:', 'admin:', 's3:');
 
         $outgoing_count = 0;
         // loop through all found items

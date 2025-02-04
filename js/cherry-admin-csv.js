@@ -215,7 +215,7 @@ jQuery(document).ready(function ($) {
 
         create_preview_summary(posts);
 
-        let table_limit = 50;
+        let table_limit = 150;
         let open_spoiler_id = false;
         let out_repeats = '';
         if (posts.has_repeats.length > 0) {

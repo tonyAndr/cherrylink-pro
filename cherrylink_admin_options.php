@@ -182,8 +182,8 @@ function linkate_posts_index_status_display($page = 'main')
         <?php
         if ($page === 'main') {
         ?>
-            <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=statistics"><button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2">Поиск проблем</button></a>
-            <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=scan"><button class="<?= CL_TWC::$BTN_NORMAL ?> mt-2"><?= $index_process_status === 'DONE' ? "Сканировать сайт" :  "Пересканировать" ?></button></a>
+            <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=statistics"><button class="<?= CL_TWC::$BTN_ACTION ?> mt-2">Проверьте сайт</button></a>
+            <a href="/wp-admin/options-general.php?page=cherrylink-pro&subpage=scan"><button class="<?= CL_TWC::$BTN_ACTION ?> mt-2"><?= $index_process_status === 'DONE' ? "Сканировать сайт" :  "Пересканировать" ?></button></a>
         <?php
         }
 
