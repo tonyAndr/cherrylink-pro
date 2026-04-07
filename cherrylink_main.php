@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: CherryLink Pro
+Plugin Name: CherryLink Pro AI
 Plugin URI: http://seocherry.ru/
-Description: Плагин для упрощения ручной внутренней перелинковки. Поиск релевантных ссылок, ускорение монотонных действий, гибкие настройки, удобная статистика и экспорт.
-Version: 0.9.8.1
+Description: Плагин для автоматической внутренней перелинковки на основе семантического поиска (AI). Находит релевантные статьи и предлагает анкорные фразы с помощью векторных эмбеддингов.
+Version: 0.1.0
 Author: Anton SeoCherry.ru
 Author URI: http://seocherry.ru/
 Text Domain: cherrylink-td
